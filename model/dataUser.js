@@ -2,7 +2,7 @@ const { write, read } = require('fs');
 
 const cryption = require('../cryption');
 
-const pool = require('./dbConfig');
+const pool = require('./dbConfig.js');
 pool.connect(function (err) {
   if (err) {
     throw err;
