@@ -1,5 +1,5 @@
 let jwt = require('jsonwebtoken');
-global.config = require('./helpers/tokenConfig');
+global.config = require('./tokenConfig');
 
 exports.compareRole = (token) => {
     return new Promise((resolve, reject) => {

@@ -43,4 +43,4 @@ yarn.lock
 *.code-workspace
 .settings/
 
-data/db-config.json
+model/dbConfig.js
