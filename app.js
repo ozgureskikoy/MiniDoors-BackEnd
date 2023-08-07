@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 
 const port = 3000;
 
-const userRouter = require('./router.js');
+const userRouter = require('./helpers/router.js');
 app.use('/deneme', userRouter);
 
 

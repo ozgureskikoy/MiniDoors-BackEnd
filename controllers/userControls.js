@@ -1,12 +1,12 @@
-const sql = require('../model/data');
-global.config = require('../config');
+const sql = require('../model/dataUser');
+global.config = require('../helpers/tokenConfig');
 const bcrypt = require("bcrypt");
 const tokenS = require('../tokenControl');
 
 
 
 exports.allUser = async (req, res) => {
-  const a = await sql.readAll();
+  const a = await sql.readAllUser();
   
   let response = {
     "code": 200,
@@ -14,14 +14,14 @@ exports.allUser = async (req, res) => {
     "payload": a
   }
 
-  
+ 
 
   return res.status(200).send(response)
 };
 
 exports.findUser = async (req, res) => {
 
-  const a = await sql.read(req.body.id);
+  const a = await sql.readUser(req.body.id);
   if (a) {
 
     let response = {
@@ -42,7 +42,7 @@ exports.findUser = async (req, res) => {
 };
 exports.findUserByName = async (req, res) => {
 
-  const a = await sql.readByName(req.body.username);
+  const a = await sql.readByNameUser(req.body.username);
   if (a) {
 
     let response = {
@@ -66,7 +66,7 @@ exports.findUserByName = async (req, res) => {
 exports.loginUser = async (req, res) => {
 
   try {
-    const a = await sql.logControl(req.body.mail, req.body.password);
+    const a = await sql.logControlUser(req.body.mail, req.body.password);
 
     if (a) {
       console.log("user" + a.status);

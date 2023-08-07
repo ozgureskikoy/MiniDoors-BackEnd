@@ -1,6 +1,8 @@
-const sql = require('../model/dataUser');
+const sql = require('../model/dataAdmin');
+const sqlS = require('../model/dataSuperAdmin');
 const tokenS = require('../tokenControl');
 const bcrypt = require("bcrypt");
+
 async function tokenC(token) {
     try {
       const accessToken = token;
@@ -14,12 +16,12 @@ async function tokenC(token) {
     } catch (error) {
       console.error('Error:', error);
     }
-  }
+  } 
   
-exports.createUser = async (req, res) => {
-    if (await tokenC(req.headers['x-access-token'])== "super_admin") {
+exports.createAdmin = async (req, res) => {
+    if (await tokenC(req.headers['x-access-token'])== "admin") {
         const hash = await bcrypt.hash(req.body.pass, 10);
-        const a = await sql.write(req.body.name, hash, req.body.mail,req.body.role);
+        const a = await sql.createAdmin(req.body.name, hash, req.body.mail,req.body.role);
         if (a) {
       
           let response = {
@@ -47,9 +49,9 @@ exports.createUser = async (req, res) => {
   
   };
   
-  exports.deleteUser = async (req, res) => {
+  exports.deleteAdmin = async (req, res) => {
     if (await tokenC(req.headers['x-access-token'])== "admin") {
-        const a = await sql.delete(req.body.id)
+        const a = await sql.deleteAdmin(req.body.id)
       
         if (a) {
       
@@ -77,9 +79,9 @@ exports.createUser = async (req, res) => {
       }
   
   };
-  exports.editUser = async (req, res) => {
+  exports.editAdmin = async (req, res) => {
     if (await tokenC(req.headers['x-access-token'])== "admin") {
-        const b = await sql.read(req.body.id);
+        const b = await sql.readAdmin(req.body.id);
         
         if (b) {
           const a = await sql.update(req.body.id, req.body.name);
@@ -108,11 +110,11 @@ exports.createUser = async (req, res) => {
   
   };
   
-  exports.statusUpdate = async (req, res) => {
+  exports.statusAdmin = async (req, res) => {
     if (await tokenC(req.headers['x-access-token'])== "admin") {
-        const b = await sql.read(req.body.id);
+        const b = await sql.readAdmin(req.body.id);
         if (b) {
-          const a = await sql.statusUpdate(req.body.id, req.body.status);
+          const a = await sql.statusUpdateAdmin(req.body.id, req.body.status);
           let response = {
             "code": 200,
             "meta": "ok",

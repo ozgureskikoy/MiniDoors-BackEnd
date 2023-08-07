@@ -1,0 +1,46 @@
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Dependency directories
+bower_components/
+jspm_packages/
+
+# IDE ve metin düzenleyici dosyaları
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Yerel yapılandırma dosyaları
+.env
+
+# Log dosyaları
+logs/
+*.log
+
+# Geçici dosyalar ve klasörler
+.tmp/
+temp/
+*.tmp
+*.swp
+
+# Derleme ve build dosyaları
+dist/
+build/
+out/
+*.dist
+*.exe
+
+# Paket yönetimi dosyaları
+npm-debug.log*
+yarn-error.log*
+yarn.lock
+
+# VS Code
+.vscode/
+.history/
+*.code-workspace
+.settings/
+
+data/db-config.json

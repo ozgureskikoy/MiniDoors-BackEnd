@@ -1,8 +1,8 @@
 const express = require('express');
-const userControl = require('./controllers/userControls');
+const userControl = require('../controllers/userControls');
 userRouter = express.Router();
-const middleWare = require('./middleWare/middleware');
-const adminControls = require('./controllers/adminControls')
+const middleWare = require('../middleWare/middleware');
+const adminControls = require('../controllers/adminControls')
 
 userRouter.get('/', (req, res) => {
     res.json({ message: 'Kullanıcı listesi için /user/' })

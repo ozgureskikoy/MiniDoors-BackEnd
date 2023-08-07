@@ -3,15 +3,7 @@ const { write, read } = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const cryption = require('../cryption');
 
-const { Pool } = require('pg');
-
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'postgres',
-    password: '1576',
-    port: 5432
-});
+const pool = require('./dbConfig');
 
 pool.connect(function (err) {
     if (err) {
@@ -20,11 +12,11 @@ pool.connect(function (err) {
     console.log('connnected');
 })
 
-exports.write = async (name, pass, mail, role) => {
+exports.createSAdmin = async (name, pass, mail) => {
     try {
       await pool.query(
-        `INSERT INTO users(name, password, mail, role) VALUES($1, $2, $3, $4)`,
-        [name, pass, mail, role]
+        `INSERT INTO super_admin(name, password, mail) VALUES($1, $2, $3)`,
+        [name, pass, mail]
       );
   
       return "Data inserted successfully.";
@@ -34,19 +26,18 @@ exports.write = async (name, pass, mail, role) => {
   };
 
 
-exports.readAll = async () => {
+exports.readAllSAdmin = async () => {
     let client;
     try {
         client = await pool.connect();
         const list = [];
         const queryResult = await client.query(`
-        SELECT key as id,
+        SELECT id as id,
                name as name,
                password as password,
                mail as mail,
-               status as status,
-               role as role
-        FROM users
+               status as status
+        FROM super_admin
       `);
 
         queryResult.rows.forEach((row) => {
@@ -55,8 +46,8 @@ exports.readAll = async () => {
                 name: row.name,
                 pass: row.password,
                 mail: row.mail,
-                status: row.status,
-                role:row.role
+                status: row.status
+                
             });
         });
 
@@ -71,15 +62,15 @@ exports.readAll = async () => {
     }
 };
 
-exports.read = async (index) => {
+exports.readSAdmin = async (index) => {
     try {
       const queryResult = await pool.query(
-        `SELECT key as id,
+        `SELECT id as id,
                 name as name,
                 password as password,
                 mail as mail
-         FROM users
-         WHERE key = $1`,
+         FROM super_admin
+         WHERE id = $1`,
         [index]
       );
   
@@ -100,15 +91,15 @@ exports.read = async (index) => {
     }
   };
 
-exports.readByName = async (index) => {
+exports.readByNameSAdmin = async (index) => {
     console.log(`index=${index}`);
     try {
       const queryResult = await pool.query(
-        `SELECT key as id,
+        `SELECT id as id,
                 name as name,
                 password as password,
                 mail as mail
-         FROM users
+         FROM super_admin
          WHERE name = $1`,
         [index]
       );
@@ -131,13 +122,13 @@ exports.readByName = async (index) => {
   };
   
 
-exports.logControl = async (mail, password) => {
+exports.logControlSAdmin = async (mail, password) => {
     console.log(`1mail=${mail} pass=${password}`);
   
     try {
       const queryResult = await pool.query(
         `SELECT *
-         FROM users
+         FROM super_admin
          WHERE mail = $1`,
         [mail]
       );
@@ -151,8 +142,7 @@ exports.logControl = async (mail, password) => {
             "name": row.name,
             "pass": row.password,
             "mail": row.mail,
-            "status": row.status,
-            "role":row.role
+            "status": row.status
           };
         } else {
           return null;
@@ -166,15 +156,10 @@ exports.logControl = async (mail, password) => {
   };
 
 
-
-
-
-
-
-exports.delete = async (index) => {
+exports.deleteSAdmin = async (index) => {
     try {
       const queryResult = await pool.query(
-        `DELETE FROM users WHERE key = $1`,
+        `DELETE FROM super_admin WHERE id = $1`,
         [index]
       );
   
@@ -188,10 +173,10 @@ exports.delete = async (index) => {
     }
   };
 
-  exports.update = async (index, newData) => {
+  exports.updateSAdmin = async (index, newData) => {
     try {
       const queryResult = await pool.query(
-        `UPDATE users
+        `UPDATE super_admin
          SET name = $1
          WHERE key = $2`,
         [newData, index]
@@ -209,12 +194,12 @@ exports.delete = async (index) => {
 
 
 
-  exports.statusUpdate = async (index, newData) => {
+  exports.statusUpdateSAdmin = async (index, newData) => {
     try {
       const queryResult = await pool.query(
-        `UPDATE users
+        `UPDATE super_admin
          SET status = $1
-         WHERE key = $2`,
+         WHERE id = $2`,
         [newData, index]
       );
   
