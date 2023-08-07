@@ -1,6 +1,8 @@
 const { write, read } = require('fs');
 
-const cryption = require('../cryption');
+const cryption = require('../helpers/cryption');
+
+
 
 const pool = require('./dbConfig.js');
 pool.connect(function (err) {
@@ -27,6 +29,7 @@ exports.createUser = async (name, pass, mail, admin_id) => {
 exports.readAllUser = async () => {
   let client;
   try {
+    
     client = await pool.connect();
     const list = [];
     const queryResult = await client.query(`
@@ -34,8 +37,7 @@ exports.readAllUser = async () => {
                name as name,
                password as password,
                mail as mail,
-               status as status,
-               admin_id as admin_id
+               status as status
         FROM users
       `);
 
@@ -50,7 +52,7 @@ exports.readAllUser = async () => {
       });
     });
 
-    console.log(list);
+    
     return list;
   } catch (error) {
     throw error;
@@ -76,7 +78,7 @@ exports.readUser = async (index) => {
 
     const row = queryResult.rows[0];
     if (row) {
-      console.log(`${row.id} ${row.name}`);
+    
       return [{
         "id": row.id,
         "name": row.name,
@@ -92,7 +94,7 @@ exports.readUser = async (index) => {
 };
 
 exports.readByNameUser = async (index) => {
-  console.log(`index=${index}`);
+ 
   try {
     const queryResult = await pool.query(
       `SELECT key as id,
@@ -106,7 +108,7 @@ exports.readByNameUser = async (index) => {
 
     const row = queryResult.rows[0];
     if (row) {
-      console.log(`${row.id} ${row.name}`);
+   
       return [{
         "id": row.id,
         "name": row.name,
@@ -120,40 +122,110 @@ exports.readByNameUser = async (index) => {
     throw error;
   }
 };
-
-
-exports.logControlUser = async (mail, password) => {
-  console.log(`1mail=${mail} pass=${password}`);
+async function findUserTypeByEmail(email) {
+  const query = `
+    SELECT 'user' AS user_type
+    FROM users
+    WHERE mail = $1
+    UNION
+    SELECT 'admin' AS user_type
+    FROM admin
+    WHERE mail = $1
+    
+  `;
 
   try {
-    const queryResult = await pool.query(
-      `SELECT *
-         FROM users
-         WHERE mail = $1`,
-      [mail]
-    );
-
-    const row = queryResult.rows[0];
-    if (row) {
-      const passwordMatch = await cryption.comparePassword(password, row.password);
-      if (passwordMatch) {
-        return {
-          "id": row.id,
-          "name": row.name,
-          "pass": row.password,
-          "mail": row.mail,
-          "status": row.status,
-          "admin_id":row.admin_id
-        };
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
+    const result = await pool.query(query, [email]);
+    const resTable=result.rows.map(row => row.user_type);
+    return resTable;
   } catch (error) {
     throw error;
   }
+}
+
+
+exports.logControlUser = async (mail, password) => {
+  
+  
+  const b= await findUserTypeByEmail(mail);
+
+  if (b=="user") {
+  
+    try {
+      const queryResult = await pool.query(
+        `SELECT *
+           FROM users
+           WHERE mail = $1`,
+        [mail]
+      );
+
+      const row = queryResult.rows[0];
+      if (row) {
+        const passwordMatch = await cryption.comparePassword(password, row.password);
+        
+        if (passwordMatch) {
+         
+          return {
+            "id": row.admin_id,
+            "name": row.name,
+            "pass": row.password,
+            "mail": row.mail,
+            "status": row.status,
+            "role": b[0]
+          };
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }else if (b=="admin") {
+       console.log("CONTROL = "+b)
+       console.log("CONTROL 2= "+b[0])
+
+    try {
+      const queryResult = await pool.query(
+        `SELECT *
+           FROM admin
+           WHERE mail = $1`,
+        [mail]
+      );
+      
+  
+      const row = queryResult.rows[0];
+      if (row) {
+        
+        const passwordMatch = await cryption.comparePassword(password, row.password);
+        console.log("YETER = "+ row.admin_id);
+        if (passwordMatch) {
+          return {
+            "id": row.admin_id,
+            "name": row.name,
+            "pass": row.password,
+            "mail": row.mail,
+            "status": row.status,
+            "admin_id":row.admin_id,
+            "role": b[0]
+          };
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+  
+  
+  else{
+    return;
+  }
+  
 };
 
 
@@ -196,6 +268,7 @@ exports.updateUser = async (index, newData) => {
 
 
 exports.statusUpdateUser = async (index, newData) => {
+  
   try {
     const queryResult = await pool.query(
       `UPDATE users

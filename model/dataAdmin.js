@@ -1,7 +1,7 @@
 const { write, read } = require('fs');
 
 const sqlite3 = require('sqlite3').verbose();
-const cryption = require('../cryption');
+const cryption = require('../helpers/cryption');
 
 const pool = require('./dbConfig');
 
@@ -12,11 +12,11 @@ pool.connect(function (err) {
     console.log('connnected');
 })
 
-exports.createAdmin = async (name, pass, mail, super_admin_id) => {
+exports.createAdmin = async (name, pass, mail) => {
     try {
       await pool.query(
-        `INSERT INTO admin(name, password, mail, super_admin_id) VALUES($1, $2, $3, $4)`,
-        [name, pass, mail, super_admin_id]
+        `INSERT INTO admin(name, password, mail) VALUES($1, $2, $3)`,
+        [name, pass, mail]
       );
   
       return "Data inserted successfully.";
@@ -36,8 +36,7 @@ exports.readAllAdmin = async () => {
                name as name,
                password as password,
                mail as mail,
-               status as status,
-               super_admin_id as super_admin_id
+               status as status
         FROM admin
       `);
 
@@ -47,8 +46,8 @@ exports.readAllAdmin = async () => {
                 name: row.name,
                 pass: row.password,
                 mail: row.mail,
-                status: row.status,
-                super_admin_id:row.super_admin_id
+                status: row.status
+                
             });
         });
 
@@ -121,42 +120,6 @@ exports.readByNameAdmin = async (index) => {
       throw error;
     }
   };
-  
-
-exports.logControlAdmin = async (mail, password) => {
-    console.log(`1mail=${mail} pass=${password}`);
-  
-    try {
-      const queryResult = await pool.query(
-        `SELECT *
-         FROM admin
-         WHERE mail = $1`,
-        [mail]
-      );
-  
-      const row = queryResult.rows[0];
-      if (row) {
-        const passwordMatch = await cryption.comparePassword(password, row.password);
-        if (passwordMatch) {
-          return {
-            "id": row.id,
-            "name": row.name,
-            "pass": row.password,
-            "mail": row.mail,
-            "status": row.status,
-            "super_admin_id":row.super_admin_id
-          };
-        } else {
-          return null;
-        }
-      } else {
-        return null;
-      }
-    } catch (error) {
-      throw error;
-    }
-  };
-
 
 exports.deleteAdmin = async (index) => {
     try {

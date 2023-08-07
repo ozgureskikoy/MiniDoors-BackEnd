@@ -16,12 +16,14 @@ userRouter.get('/find_user', middleWare.tokenControl, userControl.findUser)
 
 userRouter.get('/find_username', middleWare.tokenControl, userControl.findUserByName)
 
-userRouter.post('/user/create', middleWare.typeCheckData, adminControls.createUser)
+userRouter.post('/user/create', middleWare.typeCheckData, userControl.createUser)
 
-userRouter.delete('/delete_user', middleWare.typeCheckID, middleWare.tokenControl, adminControls.deleteUser)
+userRouter.post('/admin/create', middleWare.typeCheckData, adminControls.createAdmin)
 
-userRouter.put('/update_user', middleWare.typeCheckData, middleWare.tokenControl, adminControls.editUser)
+userRouter.delete('/delete_user', middleWare.typeCheckID, middleWare.tokenControl, userControl.deleteUser)
 
-userRouter.put('/user_status', [], adminControls.statusUpdate)
+userRouter.put('/update_user', middleWare.typeCheckData, middleWare.tokenControl, userControl.editUser)
+
+userRouter.put('/user_status', [], userControl.statusUpdate)
 
 module.exports = userRouter;

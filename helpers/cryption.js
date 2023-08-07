@@ -6,7 +6,7 @@ exports.hashPassword = async (plaintextPassword) => {
 
 exports.comparePassword = async (plaintextPassword, hash) => {
     const result = await bcrypt.compare(plaintextPassword, hash);
-    console.log("aaaa" + " " + result);
+    console.log("pass compare = " + result);
     return result;
 }
 
