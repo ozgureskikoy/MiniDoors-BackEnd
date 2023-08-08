@@ -15,13 +15,21 @@ pool.connect(function (err) {
 exports.createUser = async (name, pass, mail, admin_id) => {
   try {
     await pool.query(
-      `INSERT INTO users(name, password, mail, admin_id) VALUES($1, $2, $3, $4)`,
-      [name, pass, mail, admin_id]
+      `INSERT INTO users(name, password, mail) VALUES($1, $2, $3)`,
+      [name, pass, mail]
     );
-
-    return "Data inserted successfully.";
+    let response = {
+      code: 200,
+      msg: `User created successfully.`
+    }
+    return response;
   } catch (error) {
-    throw error;
+    let response = {
+      code: 4046,
+      msg: error.detail
+    }
+    return response;
+    
   }
 };
 
@@ -183,8 +191,6 @@ exports.logControlUser = async (mail, password) => {
       throw error;
     }
   }else if (b=="admin") {
-       console.log("CONTROL = "+b)
-       console.log("CONTROL 2= "+b[0])
 
     try {
       const queryResult = await pool.query(
@@ -230,16 +236,24 @@ exports.logControlUser = async (mail, password) => {
 
 
 exports.deleteUser = async (index) => {
-  try {
+   try {
     const queryResult = await pool.query(
       `DELETE FROM users WHERE key = $1`,
       [index]
     );
 
     if (queryResult.rowCount > 0) {
-      return `User with index=${index} deleted successfully.`;
+      let response = {
+        code: 200,
+        msg: `User with index=${index} deleted successfully.`
+      }
+      return response;
     } else {
-      return `User with index=${index} not found.`;
+      let response = {
+        code: 4044,
+        msg: `User with index=${index} not found.`
+      }
+      return response;
     }
   } catch (error) {
     throw error;
@@ -256,9 +270,18 @@ exports.updateUser = async (index, newData) => {
     );
 
     if (queryResult.rowCount > 0) {
-      return "Data updated successfully.";
+      let response = {
+        code: 200,
+        msg: "Data updated successfully."
+      }
+      return response;
     } else {
-      return "User with the specified index not found.";
+      let response = {
+        code: 4044,
+        msg: "User with the specified index not found."
+      }
+      return response;
+
     }
   } catch (error) {
     throw error;
@@ -278,9 +301,17 @@ exports.statusUpdateUser = async (index, newData) => {
     );
 
     if (queryResult.rowCount > 0) {
-      return "Status updated successfully.";
+      let response = {
+        code: 200,
+        msg: "Status updated successfully."
+      }
+      return response;
     } else {
-      return "User with the specified index not found.";
+      let response = {
+        code: 4044,
+        msg: "User with the specified index not found."
+      }
+      return response;
     }
   } catch (error) {
     throw error;

@@ -3,26 +3,6 @@ global.config = require('../helpers/tokenConfig');
 const bcrypt = require("bcrypt");
 const tokenS = require('../helpers/tokenControl');
 
-async function tokenC(token) {
-  try {
-    const accessToken = token;
-    console.log("access token = " + accessToken);
-
-    const decodedToken = await tokenS.compareRole(accessToken);
-    console.log("access token role =", decodedToken);
-
-    return {
-      role: decodedToken.role,
-      id: decodedToken.id
-    }
-
-
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
-
-
 exports.loginUser = async (req, res) => {
 
   try {
@@ -40,6 +20,7 @@ exports.loginUser = async (req, res) => {
         };
         let token = tokenS.tokenCreate(userdata);
         res.status(200).json({
+          code:200,
           message: a,
           jwtoken: token
         });
@@ -47,6 +28,7 @@ exports.loginUser = async (req, res) => {
       } else {
         res.status(402).json({
           message: {
+            code:4042,
             name: a.name,
             mail: a.mail
 
@@ -58,6 +40,7 @@ exports.loginUser = async (req, res) => {
 
     } else {
       res.status(401).json({
+        code:4041,
         message: 'Login Failed'
       });
     }
@@ -65,6 +48,7 @@ exports.loginUser = async (req, res) => {
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({
+      code:500,
       message: 'Server Error'
     });
   }
@@ -135,96 +119,65 @@ exports.findUserByName = async (req, res) => {
 exports.createUser = async (req, res) => {
 
   const hash = await bcrypt.hash(req.body.pass, 10);
-  const a = await sql.createUser(req.body.name, hash, req.body.mail, f.id);
-  if (a) {
+  const a = await sql.createUser(req.body.name, hash, req.body.mail, req.body.role);
+  if (a.code==200) {
 
-    let response = {
-      "code": 200,
-      "meta": "ok",
-      "payload": a
-    }
-    return res.status(200).send(response)
+    return res.status(200).send(a)
+   
+
   } else {
-
-    let response = {
-      "code": 4044,
-      "meta": "User not found"
-    }
-    return res.status(404).send(response)
+    return res.status(406).send(a)
+   
   }
 
 };
 
 exports.deleteUser = async (req, res) => {
   
-    const a = await sql.deleteUser(req.body.id)
+  const a = await sql.deleteUser(req.body.id)
 
-    if (a) {
+  if (a.code==200) {
 
-      let response = {
-        "code": 200,
-        "meta": "ok",
-        "payload": a
-      }
-      return res.status(200).send(response)
+    return res.status(200).send(a)
+   
 
-    } else {
-      let response = {
-        "code": 4044,
-        "meta": "User not found"
-      }
-      return res.status(404).send(response)
-    }
+  } else {
+    return res.status(404).send(a)
+   
+  }
 
-  
+
 
 };
 exports.editUser = async (req, res) => {
   
-    const b = await sql.readUser(req.body.id);
+  const a = await sql.updateUser(req.body.id, req.body.name);
 
-    if (b) {
-      const a = await sql.updateUser(req.body.id, req.body.name);
-      let response = {
-        "code": 200,
-        "meta": "ok",
-        "msg": "User updated successfully",
-        "payload": a
-      }
-      return res.status(200).send(response)
-    } else {
-      let response = {
-        "code": 4044,
-        "meta": "User not found"
-      }
-      return res.status(404).send(response)
-    }
 
-  
+  if (a.code == 200) {
+
+    return res.status(200).send(a)
+  } else {
+
+    return res.status(404).send(a)
+  }
 
 };
 
+
+
 exports.statusUpdate = async (req, res) => {
   
-    const b = await sql.readUser(req.body.id);
-    if (b) {
-      const a = await sql.statusUpdateUser(req.body.id, req.body.status);
-      let response = {
-        "code": 200,
-        "meta": "ok",
-        "msg": "User status chanced",
-        "payload": a
-      }
-      return res.status(200).send(response)
-    } else {
-      let response = {
-        "code": 4044,
-        "meta": "User not found"
-      }
-      return res.status(404).send(response)
-    }
+  const a = await sql.statusUpdateUser(req.body.id, req.body.status);
+ 
+  if (a.code==200) {
+    
+    return res.status(200).send(a)
+    
+  } else {
+    return res.status(404).send(a)
+  }
 
-  
 }
 
 
