@@ -70,7 +70,7 @@ exports.readAdmin = async (index) => {
                 password as password,
                 mail as mail
          FROM admin
-         WHERE key = $1`,
+         WHERE admin_id = $1`,
         [index]
       );
   
@@ -143,7 +143,7 @@ exports.deleteAdmin = async (index) => {
       const queryResult = await pool.query(
         `UPDATE admin
          SET name = $1
-         WHERE key = $2`,
+         WHERE admin_id = $2`,
         [newData, index]
       );
   
@@ -164,7 +164,7 @@ exports.deleteAdmin = async (index) => {
       const queryResult = await pool.query(
         `UPDATE admin
          SET status = $1
-         WHERE key = $2`,
+         WHERE admin_id = $2`,
         [newData, index]
       );
   

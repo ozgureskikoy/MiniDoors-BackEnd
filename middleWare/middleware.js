@@ -1,7 +1,7 @@
 const { check, body, query, validationResult } = require('express-validator');
 const { emitWarning } = require('process');
 var jwt = require('jsonwebtoken');
-
+const tokenS = require('../helpers/tokenControl')
 
 exports.typeCheckID = [
     body("id", "id must be integer").isNumeric(),
@@ -38,9 +38,11 @@ exports.typeCheckData = [
 ]
 
 exports.tokenControl = [
-    (req, res, next) => {
+    async (req, res, next) => {
         var token = req.headers['x-access-token'];
-        if (token) {
+        const decodedToken = await tokenS.compareRole(token);
+        console.log('middleware control = '+decodedToken.role)
+        if (decodedToken.role == "admin") {
             jwt.verify(token, global.config.secretKey,
                 {
                     algorithm: global.config.algorithm
@@ -54,7 +56,7 @@ exports.tokenControl = [
                         console.log(errordata);
                         return res.status(401).json({
                             code: "4041",
-                            message: 'Unauthorized Access'
+                            message: 'uUnauthorized Access'
                         });
                     }
                     req.decoded = decoded;

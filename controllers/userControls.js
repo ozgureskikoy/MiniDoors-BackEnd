@@ -134,43 +134,30 @@ exports.findUserByName = async (req, res) => {
 
 exports.createUser = async (req, res) => {
 
-  const f = await tokenC(req.headers['x-access-token'])
+  const hash = await bcrypt.hash(req.body.pass, 10);
+  const a = await sql.createUser(req.body.name, hash, req.body.mail, f.id);
+  if (a) {
 
-  if (await f.role == "admin") {
-    console.log("deneme rol = "+f.role);
-    console.log("deneme id = "+f.id);
-    const hash = await bcrypt.hash(req.body.pass, 10);
-    const a = await sql.createUser(req.body.name, hash, req.body.mail, f.id);
-    if (a) {
-
-      let response = {
-        "code": 200,
-        "meta": "ok",
-        "payload": a
-      }
-      return res.status(200).send(response)
-    } else {
-
-      let response = {
-        "code": 4044,
-        "meta": "User not found"
-      }
-      return res.status(404).send(response)
+    let response = {
+      "code": 200,
+      "meta": "ok",
+      "payload": a
     }
+    return res.status(200).send(response)
   } else {
+
     let response = {
       "code": 4044,
-      "meta": "Unautorized Prosscess"
+      "meta": "User not found"
     }
     return res.status(404).send(response)
   }
-
 
 };
 
 exports.deleteUser = async (req, res) => {
-  if (await tokenC(req.headers['x-access-token']) == "admin") {
-    const a = await sql.delete(req.body.id)
+  
+    const a = await sql.deleteUser(req.body.id)
 
     if (a) {
 
@@ -189,21 +176,15 @@ exports.deleteUser = async (req, res) => {
       return res.status(404).send(response)
     }
 
-  } else {
-    let response = {
-      "code": 4044,
-      "meta": "Unautorized Prosscess"
-    }
-    return res.status(404).send(response)
-  }
+  
 
 };
 exports.editUser = async (req, res) => {
-  if (await tokenC(req.headers['x-access-token']) == "admin") {
-    const b = await sql.read(req.body.id);
+  
+    const b = await sql.readUser(req.body.id);
 
     if (b) {
-      const a = await sql.update(req.body.id, req.body.name);
+      const a = await sql.updateUser(req.body.id, req.body.name);
       let response = {
         "code": 200,
         "meta": "ok",
@@ -219,21 +200,15 @@ exports.editUser = async (req, res) => {
       return res.status(404).send(response)
     }
 
-  } else {
-    let response = {
-      "code": 4044,
-      "meta": "Unautorized Prosscess"
-    }
-    return res.status(404).send(response)
-  }
+  
 
 };
 
 exports.statusUpdate = async (req, res) => {
-  if (await tokenC(req.headers['x-access-token']) == "admin") {
-    const b = await sql.read(req.body.id);
+  
+    const b = await sql.readUser(req.body.id);
     if (b) {
-      const a = await sql.statusUpdate(req.body.id, req.body.status);
+      const a = await sql.statusUpdateUser(req.body.id, req.body.status);
       let response = {
         "code": 200,
         "meta": "ok",
@@ -249,13 +224,7 @@ exports.statusUpdate = async (req, res) => {
       return res.status(404).send(response)
     }
 
-  } else {
-    let response = {
-      "code": 4044,
-      "meta": "Unautorized Prosscess"
-    }
-    return res.status(404).send(response)
-  }
+  
 }
 
 
