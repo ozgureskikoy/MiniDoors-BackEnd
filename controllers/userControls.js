@@ -20,7 +20,7 @@ exports.loginUser = async (req, res) => {
         };
         let token = tokenS.tokenCreate(userdata);
         res.status(200).json({
-          code:200,
+          code: 200,
           message: a,
           jwtoken: token
         });
@@ -28,7 +28,7 @@ exports.loginUser = async (req, res) => {
       } else {
         res.status(402).json({
           message: {
-            code:4042,
+            code: 4042,
             name: a.name,
             mail: a.mail
 
@@ -40,7 +40,7 @@ exports.loginUser = async (req, res) => {
 
     } else {
       res.status(401).json({
-        code:4041,
+        code: 4041,
         message: 'Login Failed'
       });
     }
@@ -48,7 +48,7 @@ exports.loginUser = async (req, res) => {
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({
-      code:500,
+      code: 500,
       message: 'Server Error'
     });
   }
@@ -120,37 +120,37 @@ exports.createUser = async (req, res) => {
 
   const hash = await bcrypt.hash(req.body.pass, 10);
   const a = await sql.createUser(req.body.name, hash, req.body.mail, req.body.role);
-  if (a.code==200) {
+  if (a.code == 200) {
 
     return res.status(200).send(a)
-   
+
 
   } else {
     return res.status(406).send(a)
-   
+
   }
 
 };
 
 exports.deleteUser = async (req, res) => {
-  
+
   const a = await sql.deleteUser(req.body.id)
 
-  if (a.code==200) {
+  if (a.code == 200) {
 
     return res.status(200).send(a)
-   
+
 
   } else {
     return res.status(404).send(a)
-   
+
   }
 
 
 
 };
 exports.editUser = async (req, res) => {
-  
+
   const a = await sql.updateUser(req.body.id, req.body.name);
 
 
@@ -167,13 +167,13 @@ exports.editUser = async (req, res) => {
 
 
 exports.statusUpdate = async (req, res) => {
-  
+
   const a = await sql.statusUpdateUser(req.body.id, req.body.status);
- 
-  if (a.code==200) {
-    
+
+  if (a.code == 200) {
+
     return res.status(200).send(a)
-    
+
   } else {
     return res.status(404).send(a)
   }

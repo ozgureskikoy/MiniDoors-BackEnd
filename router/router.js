@@ -28,8 +28,8 @@ userRouter.put('/update_user', middleWare.typeCheckData, middleWare.tokenControl
 
 userRouter.put('/update_admin', middleWare.typeCheckData, middleWare.tokenControl,  adminControls.editAdmin)
 
-userRouter.put('/user_status', middleWare.tokenControl, middleWare.tokenControl, userControl.statusUpdate)
+userRouter.put('/user_status', middleWare.tokenControl,middleWare.typeCheckID , userControl.statusUpdate)
 
-userRouter.put('/admin_status', middleWare.tokenControl, middleWare.tokenControl, adminControls.statusUpdateAdmin)
+userRouter.put('/admin_status', middleWare.tokenControl, middleWare.typeCheckID , adminControls.statusUpdateAdmin)
 
 module.exports = userRouter;
