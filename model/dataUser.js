@@ -9,14 +9,13 @@ pool.connect(function (err) {
   if (err) {
     throw err;
   }
-  console.log('connnected');
 })
 
-exports.createUser = async (name, pass, mail, admin_id) => {
+exports.createUser = async (name, pass, mail, admin_id, comp_id) => {
   try {
     await pool.query(
-      `INSERT INTO users(name, password, mail) VALUES($1, $2, $3)`,
-      [name, pass, mail]
+      `INSERT INTO users(name, password, mail, admin_id, company_id) VALUES($1, $2, $3, $4, $5)`,
+      [name, pass, mail, admin_id, comp_id]
     );
     let response = {
       code: 200,
@@ -29,7 +28,7 @@ exports.createUser = async (name, pass, mail, admin_id) => {
       msg: error.detail
     }
     return response;
-    
+
   }
 };
 
@@ -37,7 +36,7 @@ exports.createUser = async (name, pass, mail, admin_id) => {
 exports.readAllUser = async () => {
   let client;
   try {
-    
+
     client = await pool.connect();
     const list = [];
     const queryResult = await client.query(`
@@ -45,7 +44,9 @@ exports.readAllUser = async () => {
                name as name,
                password as password,
                mail as mail,
-               status as status
+               status as status,
+               admin_id as admin_id,
+               company_id as company_id
         FROM users
       `);
 
@@ -56,11 +57,12 @@ exports.readAllUser = async () => {
         pass: row.password,
         mail: row.mail,
         status: row.status,
-        admin_id: row.admin_id
+        admin_id: row.admin_id,
+        comp_id: row.company_id_id
       });
     });
 
-    
+
     return list;
   } catch (error) {
     throw error;
@@ -75,10 +77,12 @@ exports.readUser = async (index) => {
   try {
     const queryResult = await pool.query(
       `SELECT key as id,
-                name as name,
-                password as password,
-                mail as mail,
-                admin_id as admin_id
+               name as name,
+               password as password,
+               mail as mail,
+               status as status,
+               admin_id as admin_id,
+               company_id as company_id
          FROM users
          WHERE key = $1`,
       [index]
@@ -86,12 +90,15 @@ exports.readUser = async (index) => {
 
     const row = queryResult.rows[0];
     if (row) {
-    
+
       return [{
-        "id": row.id,
-        "name": row.name,
-        "pass": row.password,
-        "mail": row.mail
+        id: row.id,
+        name: row.name,
+        pass: row.password,
+        mail: row.mail,
+        status: row.status,
+        admin_id: row.admin_id,
+        comp_id: row.company_id_id
       }];
     } else {
       return [];
@@ -102,13 +109,16 @@ exports.readUser = async (index) => {
 };
 
 exports.readByNameUser = async (index) => {
- 
+
   try {
     const queryResult = await pool.query(
       `SELECT key as id,
                 name as name,
                 password as password,
-                mail as mail
+                mail as mail,
+                status as status,
+                admin_id as admin_id,
+                company_id as company_id
          FROM users
          WHERE name = $1`,
       [index]
@@ -116,20 +126,29 @@ exports.readByNameUser = async (index) => {
 
     const row = queryResult.rows[0];
     if (row) {
-   
-      return [{
+
+      return {
+        "code": 200,
         "id": row.id,
         "name": row.name,
         "pass": row.password,
-        "mail": row.mail
-      }];
+        "mail": row.mail,
+        "status": row.status,
+        "admin_id": row.admin_id,
+        "comp_id": row.company_id
+      };
     } else {
-      return [];
+      return {
+        "code": 4044,
+        "meta": "User not found"
+      };
     }
   } catch (error) {
     throw error;
   }
 };
+
+
 async function findUserTypeByEmail(email) {
   const query = `
     SELECT 'user' AS user_type
@@ -144,7 +163,7 @@ async function findUserTypeByEmail(email) {
 
   try {
     const result = await pool.query(query, [email]);
-    const resTable=result.rows.map(row => row.user_type);
+    const resTable = result.rows.map(row => row.user_type);
     return resTable;
   } catch (error) {
     throw error;
@@ -153,12 +172,12 @@ async function findUserTypeByEmail(email) {
 
 
 exports.logControlUser = async (mail, password) => {
-  
-  
-  const b= await findUserTypeByEmail(mail);
 
-  if (b=="user") {
-  
+
+  const b = await findUserTypeByEmail(mail);
+
+  if (b == "user") {
+
     try {
       const queryResult = await pool.query(
         `SELECT *
@@ -170,9 +189,9 @@ exports.logControlUser = async (mail, password) => {
       const row = queryResult.rows[0];
       if (row) {
         const passwordMatch = await cryption.comparePassword(password, row.password);
-        
+
         if (passwordMatch) {
-         
+
           return {
             "id": row.admin_id,
             "name": row.name,
@@ -190,8 +209,7 @@ exports.logControlUser = async (mail, password) => {
     } catch (error) {
       throw error;
     }
-  }else if (b=="admin") {
-
+  } else if (b == "admin") {
     try {
       const queryResult = await pool.query(
         `SELECT *
@@ -199,13 +217,13 @@ exports.logControlUser = async (mail, password) => {
            WHERE mail = $1`,
         [mail]
       );
-      
-  
+
+
       const row = queryResult.rows[0];
       if (row) {
-        
+
         const passwordMatch = await cryption.comparePassword(password, row.password);
-        console.log("YETER = "+ row.admin_id);
+        console.log("YETER = " + row.admin_id);
         if (passwordMatch) {
           return {
             "id": row.admin_id,
@@ -213,7 +231,7 @@ exports.logControlUser = async (mail, password) => {
             "pass": row.password,
             "mail": row.mail,
             "status": row.status,
-            "admin_id":row.admin_id,
+            "admin_id": row.admin_id,
             "role": b[0]
           };
         } else {
@@ -226,17 +244,17 @@ exports.logControlUser = async (mail, password) => {
       throw error;
     }
   }
-  
-  
-  else{
+
+
+  else {
     return;
   }
-  
+
 };
 
 
 exports.deleteUser = async (index) => {
-   try {
+  try {
     const queryResult = await pool.query(
       `DELETE FROM users WHERE key = $1`,
       [index]
@@ -291,7 +309,7 @@ exports.updateUser = async (index, newData) => {
 
 
 exports.statusUpdateUser = async (index, newData) => {
-  
+
   try {
     const queryResult = await pool.query(
       `UPDATE users

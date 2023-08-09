@@ -2,6 +2,7 @@ const sql = require('../model/dataUser');
 global.config = require('../helpers/tokenConfig');
 const bcrypt = require("bcrypt");
 const tokenS = require('../helpers/tokenControl');
+const company = require('./companyControls')
 
 exports.loginUser = async (req, res) => {
 
@@ -94,21 +95,27 @@ exports.findUser = async (req, res) => {
 exports.findUserByName = async (req, res) => {
 
   const a = await sql.readByNameUser(req.body.username);
-  if (a) {
+  if (a.code==200) {
 
-    let response = {
-      "code": 200,
-      "meta": "ok",
-      "payload": a
-    }
-    return res.status(200).send(response)
+    return res.status(200).send(a)
+ 
   } else {
 
-    let response = {
-      "code": 4044,
-      "meta": "User not found"
-    }
-    return res.status(404).send(response)
+    return res.status(404).send(a)
+  
+  }
+
+};
+
+exports.findDoorByNamewIndex = async (name) => {
+
+  const a = await sql.readByNameUser(name);
+  if (a) {
+
+    return a;
+  } else {
+
+    return;
   }
 
 };
@@ -116,18 +123,29 @@ exports.findUserByName = async (req, res) => {
 
 
 
+
 exports.createUser = async (req, res) => {
-
-  const hash = await bcrypt.hash(req.body.pass, 10);
-  const a = await sql.createUser(req.body.name, hash, req.body.mail, req.body.role);
-  if (a.code == 200) {
-
-    return res.status(200).send(a)
-
-
-  } else {
-    return res.status(406).send(a)
-
+  const comp_id = await company.findCompanyByName(req.body.comp);
+  if (comp_id) {
+    
+    const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
+    console.log('Comp id = '+comp_id)
+    const hash = await bcrypt.hash(req.body.pass, 10);
+    const a = await sql.createUser(req.body.name, hash, req.body.mail, admin_id, comp_id);
+    if (a.code == 200) {
+  
+      return res.status(200).send(a)
+  
+  
+    } else {
+      return res.status(406).send(a)
+  
+    }
+  }else{
+    return res.status(404).send({
+      code:4044,
+      msg:"Company not found"
+    })
   }
 
 };

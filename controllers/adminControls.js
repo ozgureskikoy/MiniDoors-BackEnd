@@ -1,5 +1,4 @@
 const sql = require('../model/dataAdmin');
-const tokenS = require('../helpers/tokenControl');
 const bcrypt = require("bcrypt");
 
 
@@ -16,7 +15,6 @@ exports.createAdmin = async (req, res) => {
     return res.status(406).send(a)
    
   }
-
 
 
 };

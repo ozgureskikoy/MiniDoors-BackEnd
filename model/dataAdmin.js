@@ -10,7 +10,6 @@ pool.connect(function (err) {
   if (err) {
     throw err;
   }
-  console.log('connnected');
 })
 
 exports.createAdmin = async (name, pass, mail) => {

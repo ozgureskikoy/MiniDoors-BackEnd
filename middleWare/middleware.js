@@ -21,7 +21,7 @@ exports.typeCheckID = [
 ]
 
 exports.typeCheckData = [
-    body("name", "name must be integer").isString(),
+    body("name", "name must be string").isString(),
     check("name", "name is empty").not().isEmpty(),
     (req, res, next) => {
         const errors = validationResult(req)
@@ -41,7 +41,6 @@ exports.tokenControl = [
     async (req, res, next) => {
         var token = req.headers['x-access-token'];
         const decodedToken = await tokenS.compareRole(token);
-        console.log('middleware control = '+decodedToken.role)
         if (decodedToken.role == "admin") {
             jwt.verify(token, global.config.secretKey,
                 {
@@ -56,11 +55,12 @@ exports.tokenControl = [
                         console.log(errordata);
                         return res.status(401).json({
                             code: "4041",
-                            message: 'uUnauthorized Access'
+                            message: 'Unauthorized Access'
                         });
                     }
                     req.decoded = decoded;
                     next();
+                    return decoded;
                 });
         } else {
             return res.status(403).json({
