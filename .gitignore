@@ -44,5 +44,5 @@ yarn.lock
 .settings/
 
 /model/dbConfig.js
-/model/log.txt
-/model/passlog.txt
+log.txt
+passlog.txt
