@@ -1,10 +1,6 @@
-const { write, read } = require('fs');
-
-const sqlite3 = require('sqlite3').verbose();
 const cryption = require('../helpers/cryption');
 
 const pool = require('./dbConfig');
-const { response } = require('express');
 
 pool.connect(function (err) {
   if (err) {
@@ -18,17 +14,17 @@ exports.createAdmin = async (name, pass, mail) => {
       `INSERT INTO admin(name, password, mail) VALUES($1, $2, $3)`,
       [name, pass, mail]
     );
-    let response = {
+    let result = {
       code: 200,
       msg: `Admin created successfully.`
     }
-    return response;
+    return result;
   } catch (error) {
-    let response = {
+    let result = {
       code: 4046,
       msg: error.detail
     }
-    return response;
+    return result;
     
   }
 };
@@ -137,17 +133,17 @@ exports.deleteAdmin = async (index) => {
     );
 
     if (queryResult.rowCount > 0) {
-      let response = {
+      let result = {
         code: 200,
         msg: `Admin with index=${index} deleted successfully.`
       }
-      return response;
+      return result;
     } else {
-      let response = {
+      let result = {
         code: 4044,
         msg: `Admin with index=${index} not found.`
       }
-      return response;
+      return result;
     }
   } catch (error) {
     throw error;
@@ -164,17 +160,17 @@ exports.updateAdmin = async (index, newData) => {
     );
 
     if (queryResult.rowCount > 0) {
-      let response = {
+      let result = {
         code: 200,
         msg: "Data updated successfully."
       }
-      return response;
+      return result;
     } else {
-      let response = {
+      let result = {
         code: 4044,
         msg: "Admin with the specified index not found."
       }
-      return response;
+      return result;
 
     }
   } catch (error) {
@@ -194,17 +190,17 @@ exports.statusUpdateAdmin = async (index, newData) => {
     );
 
     if (queryResult.rowCount > 0) {
-      let response = {
+      let result = {
         code: 200,
         msg: "Status updated successfully."
       }
-      return response;
+      return result;
     } else {
-      let response = {
+      let result = {
         code: 4044,
         msg: "Admin with the specified index not found."
       }
-      return response;
+      return result;
     }
   } catch (error) {
     throw error;

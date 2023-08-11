@@ -3,32 +3,10 @@ const app = express();
 app.use(express.json());
 const bodyParser = require('body-parser');
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const port = 3000;
-
-// const mail= require('./helpers/mailService')
-// const fs = require('fs');
-// const htmlFilePath = './mail.html';
-// fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {
-//     if (err) {
-//       console.error('Error reading HTML file:', err);
-//       return;
-//     }
-
-//     mail.sendEmailUsingNodemailer('ozguresk02@gmail.com', 'Yeni Şifre', htmlContent, function(error, response) {
-//       if (error) {
-//         console.log('Error:', error);
-//       } else {
-//         console.log('Response:', response);
-//       }
-//     });
-//   });
-
-
-  
+const port = 3000;  
 
 const userRouter = require('./router/routerUser');
 app.use('/user', userRouter);

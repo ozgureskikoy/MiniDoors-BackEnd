@@ -23,7 +23,9 @@ exports.createUser = async (name, mail, admin_id, comp_id) => {
     );
     let response = {
       code: 200,
-      msg: `User created successfully.`
+      msg: `User created successfully.`,
+      pass: pass,
+      mail:mail
     }
     log.passLog(`user = ${mail} pass= ${pass}`);
     return response;

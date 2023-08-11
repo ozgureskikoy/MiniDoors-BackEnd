@@ -11,13 +11,13 @@ exports.addDoor = async (req, res) => {
 
         const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
         console.log("admin= " + admin_id)
-        const a = await sql.addDoor(req.body.name, admin_id, comp_id);
-        if (a.code == 200) {
+        const response = await sql.addDoor(req.body.name, admin_id, comp_id);
+        if (response.code == 200) {
 
-            return res.status(200).send(a)
+            return res.status(200).send(response)
 
         } else {
-            return res.status(406).send(a)
+            return res.status(406).send(response)
         }
     } else {
         return res.status(404).send({
@@ -30,10 +30,10 @@ exports.addDoor = async (req, res) => {
 
 exports.findDoorByName = async (name) => {
 
-    const a = await sql.readByNameDoors(name);
-    if (a) {
+    const response = await sql.readByNameDoors(name);
+    if (response) {
 
-        return a;
+        return response;
     } else {
 
         return;
@@ -43,16 +43,16 @@ exports.findDoorByName = async (name) => {
 
 
 exports.openDoor = async (req, res) => {
-    const a = await sql.openDoor(req.body.user, req.body.door);
-    if (a.code==200) {
-       log.userLog(JSON.stringify(`${a.user} open ${a.door} at ${a.time} ${a.date}`));
-        return res.status(200).send(a)
-    }else if (a.code==4046) {
+    const response = await sql.openDoor(req.body.user, req.body.door);
+    if (response.code==200) {
+       log.userLog(JSON.stringify(`${response.user} open ${response.door} at ${response.time} ${response.date}`));
+        return res.status(200).send(response)
+    }else if (response.code==4046) {
         
-        return res.status(406).send(a)        
+        return res.status(406).send(response)        
     }else{
         
-        return res.status(404).send(a)
+        return res.status(404).send(response)
     }
 
 }; 

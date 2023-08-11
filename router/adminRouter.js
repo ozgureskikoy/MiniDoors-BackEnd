@@ -7,7 +7,7 @@ adminRouter.post('/create', middleWare.typeCheckData, middleWare.tokenControl, a
 
 adminRouter.delete('/delete', middleWare.typeCheckID, middleWare.tokenControl,  adminControls.deleteAdmin)
 
-adminRouter.put('/update', middleWare.typeCheckData, middleWare.tokenControl,  adminControls.editAdmin)
+adminRouter.put('/update', middleWare.typeCheckData, middleWare.typeCheckID, middleWare.tokenControl,  adminControls.editAdmin)
 
 adminRouter.put('/status', middleWare.tokenControl, middleWare.typeCheckID , adminControls.statusUpdateAdmin)
 

@@ -18,14 +18,14 @@ exports.createPermission = async (req, res) => {
 
             if (q.code == 4046) {
 
-                const a = await sql.createPermission(user_id.id, door_id.id, req.body.days, req.body.start, req.body.end)
+                const response = await sql.createPermission(user_id.id, door_id.id, req.body.days, req.body.start, req.body.end)
 
-                if (a.code == 200) {
-                    return res.status(200).send(a)
+                if (response.code == 200) {
+                    return res.status(200).send(response)
 
 
                 } else {
-                    return res.status(406).send(a)
+                    return res.status(406).send(response)
 
                 }
 
@@ -54,8 +54,8 @@ exports.createPermission = async (req, res) => {
 };
 
 exports.findPermission = async (user_id, door_id) => {
-    const a = await sql.findPermission(user_id, door_id);
-    return a;
+    const response = await sql.findPermission(user_id, door_id);
+    return response;
 };
 
 

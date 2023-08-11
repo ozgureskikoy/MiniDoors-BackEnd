@@ -7,14 +7,14 @@ exports.createCompany = async (req, res) => {
 
     const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
   
-    const a = await sql.createCompany(req.body.name, admin_id);
-    if (a.code == 200) {
+    const response = await sql.createCompany(req.body.name, admin_id);
+    if (response.code == 200) {
   
-      return res.status(200).send(a)
+      return res.status(200).send(response)
   
   
     } else {
-      return res.status(406).send(a)
+      return res.status(406).send(response)
   
     }
   
@@ -22,10 +22,10 @@ exports.createCompany = async (req, res) => {
 
   exports.findCompanyByName = async (name) => {
 
-    const a = await sql.readByNameCompany(name);
-    if (a) {
+    const response = await sql.readByNameCompany(name);
+    if (response) {
   
-      return a;
+      return response;
     } else {
   
       return;
