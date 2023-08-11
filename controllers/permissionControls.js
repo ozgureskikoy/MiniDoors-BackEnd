@@ -1,8 +1,5 @@
 const sql = require('../model/dataPermission');
 global.config = require('../helpers/tokenConfig');
-const bcrypt = require("bcrypt");
-const tokenS = require('../helpers/tokenControl');
-const company = require('./companyControls')
 const user = require('./userControls')
 const door = require('./doorControls')
 
@@ -19,7 +16,7 @@ exports.createPermission = async (req, res) => {
 
             const q = await this.findPermission(user_id.id, door_id.id);
 
-            if (q.code == 200) {
+            if (q.code == 4046) {
 
                 const a = await sql.createPermission(user_id.id, door_id.id, req.body.days, req.body.start, req.body.end)
 
@@ -33,7 +30,7 @@ exports.createPermission = async (req, res) => {
                 }
 
             } else {
-                return res.status(404).send({
+                return res.status(406).send({
                     msg: q
                 })
 
@@ -48,16 +45,15 @@ exports.createPermission = async (req, res) => {
         }
 
     } else {
-        return res.status(406).send({
-            code: 4046,
-            msg: "Must send door and user"
+        return res.status(404).send({
+            code: 4044,
+            msg: "Door or user not found"
         })
     }
 
 };
 
 exports.findPermission = async (user_id, door_id) => {
-
     const a = await sql.findPermission(user_id, door_id);
     return a;
 };

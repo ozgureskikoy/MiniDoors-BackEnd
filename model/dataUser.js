@@ -1,6 +1,8 @@
 const { write, read } = require('fs');
-
+const bcrypt = require("bcrypt")
 const cryption = require('../helpers/cryption');
+const log = require('../helpers/logger');
+
 
 
 
@@ -11,21 +13,24 @@ pool.connect(function (err) {
   }
 })
 
-exports.createUser = async (name, pass, mail, admin_id, comp_id) => {
+exports.createUser = async (name, mail, admin_id, comp_id) => {
   try {
+    pass = cryption.generateRandomPassword();
+    const hash = await bcrypt.hash(pass, 10);
     await pool.query(
       `INSERT INTO users(name, password, mail, admin_id, company_id) VALUES($1, $2, $3, $4, $5)`,
-      [name, pass, mail, admin_id, comp_id]
+      [name, hash, mail, admin_id, comp_id]
     );
     let response = {
       code: 200,
       msg: `User created successfully.`
     }
+    log.passLog(`user = ${mail} pass= ${pass}`);
     return response;
   } catch (error) {
     let response = {
       code: 4046,
-      msg: error.detail
+      msg: error
     }
     return response;
 
@@ -193,6 +198,7 @@ exports.logControlUser = async (mail, password) => {
         if (passwordMatch) {
 
           return {
+            "code": 200,
             "id": row.admin_id,
             "name": row.name,
             "pass": row.password,
@@ -201,13 +207,13 @@ exports.logControlUser = async (mail, password) => {
             "role": b[0]
           };
         } else {
-          return null;
+          return { code: 404 };
         }
       } else {
-        return null;
+        return { code: 404 };
       }
     } catch (error) {
-      throw error;
+      return error;
     }
   } else if (b == "admin") {
     try {
@@ -223,9 +229,10 @@ exports.logControlUser = async (mail, password) => {
       if (row) {
 
         const passwordMatch = await cryption.comparePassword(password, row.password);
-        console.log("YETER = " + row.admin_id);
+        
         if (passwordMatch) {
           return {
+            "code": 200,
             "id": row.admin_id,
             "name": row.name,
             "pass": row.password,
@@ -235,19 +242,22 @@ exports.logControlUser = async (mail, password) => {
             "role": b[0]
           };
         } else {
-          return null;
+          return { 
+            msg: "Şifre hatalı",
+            code: 404 
+          };
         }
       } else {
-        return null;
+        return { code: 404 };
       }
     } catch (error) {
-      throw error;
+      return error;
     }
   }
 
 
   else {
-    return;
+    return { code: 404 };
   }
 
 };
@@ -335,6 +345,86 @@ exports.statusUpdateUser = async (index, newData) => {
     throw error;
   }
 };
+
+
+exports.chancePass = async (mail, pass, newpass) => {
+  try {
+    const a = await this.logControlUser(mail, pass);
+    if (a.code == 200) {
+      const hash = await bcrypt.hash(newpass, 10);
+
+      const queryResult = await pool.query(
+        `UPDATE users
+           SET password = $1
+           WHERE mail = $2`,
+        [hash, mail]
+      );
+
+      if (queryResult.rowCount > 0) {
+        let response = {
+          code: 200,
+          msg: "Password updated."
+        }
+        log.passLog(`user = ${mail} pass= ${newpass}`);
+        return response;
+      } else {
+        let response = {
+          code: 4044,
+          msg: "User information is incorrect."
+        }
+        return response;
+      }
+    } else {
+      let response = {
+        code: 4044,
+        msg: "mail or password incorrect"
+      }
+      return response;
+    }
+
+
+  } catch {
+    return;
+  }
+
+};
+
+const mail = require('../helpers/mailService')
+
+exports.forgotPass = async (mail) => {
+  try {
+    pass = cryption.generateRandomPassword();
+    const hash = await bcrypt.hash(pass, 10);
+
+    const queryResult = await pool.query(
+      `UPDATE users
+       SET password = $1
+       WHERE mail = $2`,
+      [hash, mail]
+    );
+
+    if (queryResult.rowCount > 0) {
+      let response = {
+        code: 200,
+        msg: "Password sended to mail.",
+        pass: pass,
+        mail: mail
+      }
+      log.passLog(`user = ${mail} pass= ${pass}`);
+      return response;
+    } else {
+      let response = {
+        code: 4044,
+        msg: "User with the specified mail not found."
+      }
+      return response;
+    }
+
+  } catch {
+    return error;
+  }
+
+}
 
 
 function serverClose() {

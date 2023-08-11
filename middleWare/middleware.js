@@ -37,6 +37,23 @@ exports.typeCheckData = [
     }
 ]
 
+exports.typeCheckMail = [
+    body("mail", "mail invalid").isEmail(),
+    check("mail", "mail is empty").not().isEmpty(),
+    (req, res, next) => {
+        const errors = validationResult(req)
+        if (!errors.isEmpty()) {
+            let response = {
+                "code": 4043,
+                "meta": errors
+            }
+
+            return res.status(401).send(response)
+        }
+        next();
+    }
+]
+
 exports.tokenControl = [
     async (req, res, next) => {
         var token = req.headers['x-access-token'];
@@ -73,7 +90,7 @@ exports.tokenControl = [
 ]
 
 exports.typeStatus = [
-    body("name", "name must be integer").isString(),
+    body("status", "status must be integer").isString(),
     (req, res, next) => {
         const errors = validationResult(req)
         if (!errors.isEmpty()) {

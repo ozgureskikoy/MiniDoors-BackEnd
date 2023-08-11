@@ -34,7 +34,10 @@ exports.findPermission = async (user_id, door_id) => {
     const queryResult = await pool.query(
       `SELECT permission_id as permission_id,
                   user_id as user_id,
-                  door_id as door_id
+                  door_id as door_id,
+                  allowed_days as allowed_days,
+                  allowed_hours_start as allowed_hours_start,
+                  allowed_hours_end as allowed_hours_end
            FROM permission
            WHERE user_id = $1 AND door_id = $2`,
       [user_id, door_id]
@@ -42,15 +45,18 @@ exports.findPermission = async (user_id, door_id) => {
 
     const row = queryResult.rows[0];
     if (row) {
-      console.log("row = " + row.permission_id)
       return {
-        "code": 4044,
-        "meta": "This user have a permission on this door"
+        code: 200,
+        meta: "This user have a permission on this door",
+        allowed_days: row.allowed_days,
+        allowed_hours_start: row.allowed_hours_start,
+        allowed_hours_end: row.allowed_hours_end
       };
     } else {
-
+      console.log("This user dont have a permission on this door");
       return {
-        "code": 200,
+        code: 4046,
+        meta: "This user dont have a permission on this door"
 
       };
     }

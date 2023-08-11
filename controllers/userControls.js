@@ -9,7 +9,7 @@ exports.loginUser = async (req, res) => {
   try {
     const a = await sql.logControlUser(req.body.mail, req.body.password);
 
-    if (a) {
+    if (a.code==200) {
 
       if (a.status == 1) {
 
@@ -27,9 +27,9 @@ exports.loginUser = async (req, res) => {
         });
 
       } else {
-        res.status(402).json({
+        res.status(406).json({
           message: {
-            code: 4042,
+            code: 4046,
             name: a.name,
             mail: a.mail
 
@@ -95,14 +95,14 @@ exports.findUser = async (req, res) => {
 exports.findUserByName = async (req, res) => {
 
   const a = await sql.readByNameUser(req.body.username);
-  if (a.code==200) {
+  if (a.code == 200) {
 
     return res.status(200).send(a)
- 
+
   } else {
 
     return res.status(404).send(a)
-  
+
   }
 
 };
@@ -127,24 +127,23 @@ exports.findDoorByNamewIndex = async (name) => {
 exports.createUser = async (req, res) => {
   const comp_id = await company.findCompanyByName(req.body.comp);
   if (comp_id) {
-    
+
     const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
-    console.log('Comp id = '+comp_id)
-    const hash = await bcrypt.hash(req.body.pass, 10);
-    const a = await sql.createUser(req.body.name, hash, req.body.mail, admin_id, comp_id);
+    console.log('Comp id = ' + comp_id)
+    const a = await sql.createUser(req.body.name, req.body.mail, admin_id, comp_id);
     if (a.code == 200) {
-  
+
       return res.status(200).send(a)
-  
-  
+
+
     } else {
       return res.status(406).send(a)
-  
+
     }
-  }else{
+  } else {
     return res.status(404).send({
-      code:4044,
-      msg:"Company not found"
+      code: 4044,
+      msg: "Company not found"
     })
   }
 
@@ -197,7 +196,57 @@ exports.statusUpdate = async (req, res) => {
   }
 
 }
+const mail = require('../helpers/mailService')
 
+exports.forgotPass = async (req, res) => {
+
+  const a = await sql.forgotPass(req.body.mail);
+  if (a.code == 200) {
+    let response = {
+      code: a.code,
+      msg: a.msg
+    }
+    var newPassword = a.pass;
+    const sendMail = a.mail;
+    const fs = require('fs');
+    const htmlFilePath = './mail.html';
+    fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {
+      if (err) {
+        console.error('Error reading HTML file:', err);
+        return;
+      }
+      htmlContent = htmlContent.replace('{newPassword}', newPassword);
+      mail.sendEmailUsingNodemailer(sendMail, "Yeni Şifre", htmlContent, function (error, response) {
+        if (error) {
+          console.log('Error:', error);
+        } else {
+          console.log('Response:', response);
+        }
+      });
+    });
+    return res.status(200).send(response)
+
+  } else {
+    let response = {
+      code: a.code,
+      msg: a.msg
+    }
+    return res.status(404).send(response)
+  }
+}
+
+
+
+exports.changePass = async (req, res) => {
+  const a = await sql.chancePass(req.body.mail, req.body.pass, req.body.newpass);
+  if (a.code == 200) {
+
+    return res.status(200).send(a)
+
+  } else {
+    return res.status(404).send(a)
+  }
+}
 
 
 

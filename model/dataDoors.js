@@ -1,4 +1,6 @@
-
+const perm = require('./dataPermission');
+const user = require('../controllers/userControls')
+const door = require('../controllers/doorControls')
 const pool = require('./dbConfig.js');
 pool.connect(function (err) {
   if (err) {
@@ -46,7 +48,8 @@ exports.readByNameDoors = async (index) => {
 
       return {
         id: row.id,
-        comp_id: row.comp_id
+        comp_id: row.comp_id,
+        name: row.name
       };
 
     } else {
@@ -56,3 +59,65 @@ exports.readByNameDoors = async (index) => {
     throw error;
   }
 };
+
+
+exports.openDoor = async (user_id, door_id) => {
+
+  const doors = await door.findDoorByName(door_id);
+  const users = await user.findDoorByNamewIndex(user_id);
+
+  const a = await perm.findPermission(users.id, doors.id);
+
+  if (a.code == 200) {
+
+    const fetchedDay = a.allowed_days;
+
+    const startHour = a.allowed_hours_start;
+    const endHour = a.allowed_hours_end;
+    const today = new Date();
+    const date =today.getDate();
+    const month = today.getMonth();
+    const year = today.getFullYear();
+    const fullDate =`${date}.${month}.${year}` ;
+    const utcHours = today.getHours();
+    const utcMinutes = today.getMinutes();
+    const utcSeconds = today.getSeconds();
+
+    const currentHour = `${String(utcHours).padStart(2, '0')}:${String(utcMinutes).padStart(2, '0')}:${String(utcSeconds).padStart(2, '0')}`;
+
+    if (fetchedDay.includes(today.getDay()) && (currentHour >= startHour && currentHour <= endHour)) {
+
+      let response = {
+        code: 200,
+        msg: "Door open",
+        user: users.name,
+        door: doors.name,
+        time: currentHour,
+        date: fullDate
+      };
+      return response;
+
+    } else {
+
+      let response = {
+        code: 4046,
+        msg: "User dont have permission at this moment"
+      };
+      return response;
+    }
+  } else {
+    let response = {
+      code: 4044,
+      msg: "User dont have permission"
+    };
+    return response;
+  }
+};
+
+
+
+
+
+
+
+

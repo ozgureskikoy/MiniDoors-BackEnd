@@ -12,10 +12,14 @@ userRouter.get('/find', middleWare.tokenControl, userControl.findUser)
 
 userRouter.get('/find_byname', middleWare.tokenControl, userControl.findUserByName)
 
-userRouter.delete('/delete', middleWare.typeCheckID, middleWare.tokenControl,  userControl.deleteUser)
+userRouter.delete('/delete', middleWare.typeCheckID, middleWare.tokenControl, userControl.deleteUser)
 
-userRouter.put('/status', middleWare.tokenControl,middleWare.typeCheckID , userControl.statusUpdate)
+userRouter.put('/status', middleWare.tokenControl, middleWare.typeCheckID, userControl.statusUpdate)
 
 userRouter.put('/update', middleWare.typeCheckData, middleWare.tokenControl, userControl.editUser)
+
+userRouter.put('/forgot_pass', [], userControl.forgotPass)
+
+userRouter.put('/chance_pass', [], userControl.changePass)
 
 module.exports = userRouter;

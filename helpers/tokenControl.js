@@ -15,7 +15,7 @@ exports.compareRole = async (token) => {
 
     return decoded;
   } catch (error) {
-    throw error;
+    return error;
   }
 };
 
