@@ -2,7 +2,7 @@ const sql = require('../model/dataUser');
 global.config = require('../helpers/tokenConfig');
 const bcrypt = require("bcrypt");
 const tokenS = require('../helpers/tokenControl');
-const company = require('./companyControls')
+const company = require('./companyController')
 
 exports.loginUser = async (req, res) => {
 
@@ -17,9 +17,10 @@ exports.loginUser = async (req, res) => {
           username: req.body.username,
           password: req.body.password,
           role: response.role,
-          id: response.id
+          id: response.id,
+          code: 200
         };
-        let token = tokenS.tokenCreate(userdata);
+        let token = tokenS.tokenCreate(userdata, '7d');
         res.status(200).json({
           code: 200,
           message: response,
@@ -55,6 +56,61 @@ exports.loginUser = async (req, res) => {
   }
 
 };
+
+exports.forgotPass = async (req, res) => {
+
+  const response = await sql.forgotPass(req.body.mail);
+  if (response.code == 200) {
+    let result = {
+      code: response.code,
+      msg: response.msg
+    }
+
+    // var newPassword = response.pass;
+    // const sendMail = response.mail;
+    // const fs = require('fs');
+    // const htmlFilePath = './mail.html';
+    // fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {
+    //   if (err) {
+    //     console.error('Error reading HTML file:', err);
+    //     return;
+    //   }
+    //   htmlContent = htmlContent.replace('{newPassword}', newPassword);
+    //   mail.sendEmailUsingNodemailer(sendMail, "Yeni Şifre", htmlContent, function (error, response) {
+    //     if (error) {
+    //       console.log('Error:', error);
+    //     } else {
+    //       console.log('Response:', response);
+    //     }
+    //   });
+    // });
+    return res.status(200).send(result)
+
+  } else {
+
+    let result = {
+      code: response.code,
+      msg: response.msg
+    }
+    return res.status(404).send(result)
+  }
+}
+
+
+
+exports.changePass = async (req, res) => {
+
+  const mail = req.query.mail;
+  const token = req.query.token;
+  const response = await sql.chancePass(mail, token, req.body.newpass, req.body.newpassA);
+  if (response.code == 200) {
+
+    return res.status(200).send(response)
+
+  } else {
+    return res.status(404).send(response)
+  }
+}
 
 
 exports.allUser = async (req, res) => {
@@ -107,9 +163,9 @@ exports.findUserByName = async (req, res) => {
 
 };
 
-exports.findDoorByNamewIndex = async (name) => {
+exports.findDoorByMail = async (mail) => {
 
-  const response = await sql.readByNameUser(name);
+  const response = await sql.readByMailUser(mail);
   if (response) {
 
     return response;
@@ -167,7 +223,7 @@ exports.createUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
 
-  const a = await sql.deleteUser(req.body.id)
+  const a = await sql.deleteUser(req.body.mail)
 
   if (a.code == 200) {
 
@@ -214,55 +270,7 @@ exports.statusUpdate = async (req, res) => {
 }
 const mail = require('../helpers/mailService')
 
-exports.forgotPass = async (req, res) => {
 
-  const response = await sql.forgotPass(req.body.mail);
-  if (response.code == 200) {
-    let result = {
-      code: response.code,
-      msg: response.msg
-    }
-    var newPassword = response.pass;
-    const sendMail = response.mail;
-    const fs = require('fs');
-    const htmlFilePath = './mail.html';
-    fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {
-      if (err) {
-        console.error('Error reading HTML file:', err);
-        return;
-      }
-      htmlContent = htmlContent.replace('{newPassword}', newPassword);
-      mail.sendEmailUsingNodemailer(sendMail, "Yeni Şifre", htmlContent, function (error, response) {
-        if (error) {
-          console.log('Error:', error);
-        } else {
-          console.log('Response:', response);
-        }
-      });
-    });
-    return res.status(200).send(result)
-
-  } else {
-    let result = {
-      code: result.code,
-      msg: result.msg
-    }
-    return res.status(404).send(result)
-  }
-}
-
-
-
-exports.changePass = async (req, res) => {
-  const response = await sql.chancePass(req.body.mail, req.body.pass, req.body.newpass);
-  if (response.code == 200) {
-
-    return res.status(200).send(response)
-
-  } else {
-    return res.status(404).send(response)
-  }
-}
 
 
 

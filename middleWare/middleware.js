@@ -1,7 +1,8 @@
 const { check, body, query, validationResult } = require('express-validator');
 const { emitWarning } = require('process');
 var jwt = require('jsonwebtoken');
-const tokenS = require('../helpers/tokenControl')
+const tokenS = require('../helpers/tokenControl');
+const { error } = require('console');
 
 exports.typeCheckID = [
     body("id", "id must be integer").isNumeric(),
@@ -53,37 +54,32 @@ exports.typeCheckMail = [
         next();
     }
 ]
-
 exports.tokenControl = [
     async (req, res, next) => {
         var token = req.headers['x-access-token'];
         const decodedToken = await tokenS.compareRole(token);
         if (decodedToken.role == "admin") {
-            jwt.verify(token, global.config.secretKey,
-                {
-                    algorithm: global.config.algorithm
+            const expirationDate = new Date(decodedToken.exp * 1000);
+            console.log('JWT expires at:', expirationDate);
 
-                }, function (err, decoded) {
-                    if (err) {
-                        let errordata = {
-                            message: err.message,
-                            expiredAt: err.expiredAt
-                        };
-                        console.log(errordata);
-                        return res.status(401).json({
-                            code: "4041",
-                            message: 'Unauthorized Access'
-                        });
-                    }
-                    req.decoded = decoded;
-                    next();
-                    return decoded;
+            const currentDate = new Date();
+            if (currentDate < expirationDate) {
+                next();
+            } else {
+                console.log('JWT has expired');
+                return res.status(403).json({
+                    code: "4043",
+                    message: 'Forbidden Access Token Expired',
                 });
+            }
+
         } else {
+
             return res.status(403).json({
                 code: "4043",
-                message: 'Forbidden Access Token Expired or Undefined'
+                message: 'Forbidden Access Token',
             });
+
         }
     }
 

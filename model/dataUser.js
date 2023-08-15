@@ -2,8 +2,9 @@ const { write, read } = require('fs');
 const bcrypt = require("bcrypt")
 const cryption = require('../helpers/cryption');
 const log = require('../helpers/logger');
-
-
+const mail = require('../helpers/mailService')
+const tokenS = require('../helpers/tokenControl')
+var jwt = require('jsonwebtoken');
 
 
 const pool = require('./dbConfig.js');
@@ -24,8 +25,7 @@ exports.createUser = async (name, mail, admin_id, comp_id) => {
     let response = {
       code: 200,
       msg: `User created successfully.`,
-      pass: pass,
-      mail:mail
+      mail: mail
     }
     log.passLog(`user = ${mail} pass= ${pass}`);
     return response;
@@ -155,6 +155,46 @@ exports.readByNameUser = async (index) => {
   }
 };
 
+exports.readByMailUser = async (index) => {
+
+  try {
+    const queryResult = await pool.query(
+      `SELECT key as id,
+                name as name,
+                password as password,
+                mail as mail,
+                status as status,
+                admin_id as admin_id,
+                company_id as company_id
+         FROM users
+         WHERE mail = $1`,
+      [index]
+    );
+
+    const row = queryResult.rows[0];
+    if (row) {
+      console.log("aa " + row);
+      return {
+        "code": 200,
+        "id": row.id,
+        "name": row.name,
+        "pass": row.password,
+        "mail": row.mail,
+        "status": row.status,
+        "admin_id": row.admin_id,
+        "comp_id": row.company_id
+      };
+    } else {
+      return {
+        "code": 4044,
+        "meta": "User not found"
+      };
+    }
+  } catch (error) {
+    return error;
+  }
+};
+
 
 async function findUserTypeByEmail(email) {
   const query = `
@@ -231,7 +271,7 @@ exports.logControlUser = async (mail, password) => {
       if (row) {
 
         const passwordMatch = await cryption.comparePassword(password, row.password);
-        
+
         if (passwordMatch) {
           return {
             "code": 200,
@@ -244,9 +284,9 @@ exports.logControlUser = async (mail, password) => {
             "role": b[0]
           };
         } else {
-          return { 
+          return {
             msg: "Şifre hatalı",
-            code: 404 
+            code: 404
           };
         }
       } else {
@@ -268,7 +308,7 @@ exports.logControlUser = async (mail, password) => {
 exports.deleteUser = async (index) => {
   try {
     const queryResult = await pool.query(
-      `DELETE FROM users WHERE key = $1`,
+      `DELETE FROM users WHERE mail = $1`,
       [index]
     );
 
@@ -349,81 +389,96 @@ exports.statusUpdateUser = async (index, newData) => {
 };
 
 
-exports.chancePass = async (mail, pass, newpass) => {
+exports.chancePass = async (mail, token, newpass, newpassA) => {
   try {
-    const a = await this.logControlUser(mail, pass);
-    if (a.code == 200) {
-      const hash = await bcrypt.hash(newpass, 10);
-
-      const queryResult = await pool.query(
-        `UPDATE users
-           SET password = $1
-           WHERE mail = $2`,
-        [hash, mail]
-      );
-
-      if (queryResult.rowCount > 0) {
-        let response = {
-          code: 200,
-          msg: "Password updated."
+    const decoded = await tokenS.compareRole(token);
+    console.log("decoded exp ==> "+decoded);
+    const expirationDate = new Date(decoded.exp * 1000);
+    console.log('JWT expires at:', expirationDate);
+    console.log('AAA '+decoded.code);
+    const currentDate = new Date();
+    if (currentDate < expirationDate) {
+      if (newpass == newpassA) {
+        const hash = await bcrypt.hash(newpass, 10);
+        const queryResult = await pool.query(
+          `UPDATE users
+             SET password = $1
+             WHERE mail = $2`,
+          [hash, mail]
+        );
+        if (queryResult.rowCount > 0) {
+          let response = {
+            code: 200,
+            msg: "Password updated."
+          }
+          log.passLog(`user = ${mail} pass= ${newpass}`);
+          return response;
+        } else {
+          let response = {
+            code: 4044,
+            msg: "User information is incorrect."
+          }
+          return response;
         }
-        log.passLog(`user = ${mail} pass= ${newpass}`);
-        return response;
-      } else {
+      }else{
         let response = {
           code: 4044,
-          msg: "User information is incorrect."
+          msg: "Passwords not matched"
         }
         return response;
       }
+
     } else {
-      let response = {
-        code: 4044,
-        msg: "mail or password incorrect"
-      }
-      return response;
+        console.log('JWT has expired');
+        return {
+            code: 4043,
+            message: 'Forbidden Access Token Expired',
+        };
     }
+    
 
 
-  } catch {
-    return;
+  } catch(error) {
+    return{
+      code:500,
+      error:error,
+      msg:'An error occurredd.'
+    };
   }
 
 };
 
-const mail = require('../helpers/mailService')
+
 
 exports.forgotPass = async (mail) => {
-  try {
-    pass = cryption.generateRandomPassword();
-    const hash = await bcrypt.hash(pass, 10);
 
-    const queryResult = await pool.query(
-      `UPDATE users
-       SET password = $1
-       WHERE mail = $2`,
-      [hash, mail]
-    );
+  const result = await this.readByMailUser(mail);
+  if (result.code == 200) {
 
-    if (queryResult.rowCount > 0) {
-      let response = {
-        code: 200,
-        msg: "Password sended to mail.",
-        pass: pass,
-        mail: mail
-      }
-      log.passLog(`user = ${mail} pass= ${pass}`);
-      return response;
-    } else {
-      let response = {
-        code: 4044,
-        msg: "User with the specified mail not found."
-      }
-      return response;
+    let userdata = {
+      mail: mail
+    };
+    let token = tokenS.tokenCreate(userdata, '1m');
+    const myUrlWithParams = new URL("http://localhost:3000/user/chance_pass");
+
+    myUrlWithParams.searchParams.append("token", token);
+    myUrlWithParams.searchParams.append("mail", mail);
+
+    console.log(myUrlWithParams.href);
+
+    let response = {
+      code: 200,
+      msg: myUrlWithParams
     }
+    return response;
 
-  } catch {
-    return error;
+  } else {
+    let response = {
+      code: 4044,
+      msg: "mail incorrect"
+    }
+    return response;
+
   }
 
 }

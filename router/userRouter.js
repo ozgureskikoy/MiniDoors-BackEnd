@@ -1,5 +1,5 @@
 const express = require('express');
-const userControl = require('../controllers/userControls');
+const userControl = require('../controllers/userController');
 
 userRouter = express.Router();
 const middleWare = require('../middleWare/middleware');
@@ -12,7 +12,7 @@ userRouter.get('/find', middleWare.tokenControl, userControl.findUser)
 
 userRouter.get('/find_byname', middleWare.tokenControl, userControl.findUserByName)
 
-userRouter.delete('/delete', middleWare.typeCheckID, middleWare.tokenControl, userControl.deleteUser)
+userRouter.delete('/delete', middleWare.typeCheckMail, userControl.deleteUser)
 
 userRouter.put('/status', middleWare.tokenControl, middleWare.typeCheckID, userControl.statusUpdate)
 

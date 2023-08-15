@@ -44,6 +44,6 @@ yarn.lock
 .settings/
 
 /model/dbConfig.js
-
+/helpers/tokenConfig.js
 log.txt
 passlog.txt

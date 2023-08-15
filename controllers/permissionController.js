@@ -1,7 +1,7 @@
 const sql = require('../model/dataPermission');
 global.config = require('../helpers/tokenConfig');
-const user = require('./userControls')
-const door = require('./doorControls')
+const user = require('./userController')
+const door = require('./doorController')
 
 
 

@@ -8,7 +8,7 @@ app.use(bodyParser.json());
 
 const port = 3000;  
 
-const userRouter = require('./router/routerUser');
+const userRouter = require('./router/userRouter');
 app.use('/user', userRouter);
 
 const adminRouter = require('./router/adminRouter');
@@ -23,7 +23,10 @@ app.use('/door', doorRouter);
 const permRouter = require('./router/permRouter');
 app.use('/perm', permRouter);
 
-const { loginUser } = require('./controllers/userControls');
+const logRouter = require('./router/logRouter');
+app.use('/log', logRouter);
+
+const { loginUser } = require('./controllers/userController');
 app.use('/login', loginUser)
 
 app.listen(port, () => {
