@@ -64,7 +64,7 @@ exports.readByNameDoors = async (index) => {
 exports.openDoor = async (user_name, door_name) => {
 
   const doors = await door.findDoorByName(door_name);
-  const users = await user.findDoorByMail(user_name);
+  const users = await user.findUserByMail(user_name);
 
   const a = await perm.findPermission(users.id, doors.id);
 

@@ -458,7 +458,7 @@ exports.forgotPass = async (mail) => {
     let userdata = {
       mail: mail
     };
-    let token = tokenS.tokenCreate(userdata, '1m');
+    let token = tokenS.tokenCreate(userdata, '10m');
     const myUrlWithParams = new URL("http://localhost:3000/user/chance_pass");
 
     myUrlWithParams.searchParams.append("token", token);

@@ -45,5 +45,5 @@ yarn.lock
 
 /model/dbConfig.js
 /helpers/tokenConfig.js
-log.txt
 passlog.txt
+/config/redisOptions.js

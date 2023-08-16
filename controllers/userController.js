@@ -163,7 +163,7 @@ exports.findUserByName = async (req, res) => {
 
 };
 
-exports.findDoorByMail = async (mail) => {
+exports.findUserByMail = async (mail) => {
 
   const response = await sql.readByMailUser(mail);
   if (response) {

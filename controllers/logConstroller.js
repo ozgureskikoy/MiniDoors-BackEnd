@@ -23,18 +23,21 @@ exports.getLogs = async (req, res) => {
                 console.log("Used as is:", date);
             }
 
-            const istanbulTime = date.toLocaleString('en-US', {
+            const istanbulTimeA = date.toLocaleString('en-US', {
                 timeZone: 'Europe/Istanbul',
-                year: 'numeric', 
-                month: '2-digit', 
+                year: 'numeric',
+                month: '2-digit',
                 day: '2-digit',
-                hour12: false, 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit' 
-            }).replace(',','');
-            console.log("istanbul time " + istanbulTime);
-
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }).replace(',', '');
+            console.log("istanbul time " + istanbulTimeA);
+            const parts = istanbulTimeA.split(' ');
+            const [datePart, timePart] = parts;
+            const [month, day, year] = datePart.split('/');
+            const istanbulTime = `${day}/${month}/${year} ${timePart}`;
             const formattedLog = {
                 ...log,
                 time: istanbulTime
@@ -52,7 +55,8 @@ exports.getLogs = async (req, res) => {
         console.log(error);
         return res.status(500).json({
             code: 500,
-            msg: 'Internal server error.'
+            msg: 'Internal server error.',
+            error: error
         });
     }
 };

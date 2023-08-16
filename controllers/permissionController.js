@@ -8,12 +8,13 @@ const door = require('./doorController')
 exports.createPermission = async (req, res) => {
 
     const door_id = await door.findDoorByName(req.body.door);
-    const user_id = await user.findDoorByNamewIndex(req.body.user);
+    const user_id = await user.findUserByMail(req.body.user);
 
+    console.log("door==> "+door_id.comp_id);
+    console.log("user==> "+user_id.comp_id);
     if (door_id && user_id) {
 
         if (door_id.comp_id == user_id.comp_id) {
-
             const q = await this.findPermission(user_id.id, door_id.id);
 
             if (q.code == 4046) {
