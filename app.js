@@ -26,8 +26,11 @@ app.use('/perm', permRouter);
 const logRouter = require('./router/logRouter');
 app.use('/log', logRouter);
 
+const { checkLogin } = require('./controllers/userController');
+app.use('/login', checkLogin)
+
 const { loginUser } = require('./controllers/userController');
-app.use('/login', loginUser)
+app.use('/login_control', loginUser)
 
 app.listen(port, () => {
     console.log(`${port}. port üzerinden server dinleniyor`);

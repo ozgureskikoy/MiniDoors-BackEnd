@@ -12,7 +12,6 @@ exports.compareRole = async (token) => {
           reject(err).code(404);
           
         } else {
-          console.log("control2==> "+decoded);
           resolve(decoded).code(200);
         }
       });

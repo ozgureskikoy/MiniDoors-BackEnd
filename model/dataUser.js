@@ -16,7 +16,7 @@ pool.connect(function (err) {
 
 exports.createUser = async (name, mail, admin_id, comp_id) => {
   try {
-    pass = cryption.generateRandomPassword();
+    pass = cryption.generateRandomPassword(10);
     const hash = await bcrypt.hash(pass, 10);
     await pool.query(
       `INSERT INTO users(name, password, mail, admin_id, company_id) VALUES($1, $2, $3, $4, $5)`,
@@ -173,7 +173,6 @@ exports.readByMailUser = async (index) => {
 
     const row = queryResult.rows[0];
     if (row) {
-      console.log("aa " + row);
       return {
         "code": 200,
         "id": row.id,
@@ -242,14 +241,17 @@ exports.logControlUser = async (mail, password) => {
           return {
             "code": 200,
             "id": row.admin_id,
+            "pass":row.password,
             "name": row.name,
-            "pass": row.password,
             "mail": row.mail,
             "status": row.status,
             "role": b[0]
           };
         } else {
-          return { code: 404 };
+          return {
+            msg: "Şifre hatalı",
+            code: 404
+          };
         }
       } else {
         return { code: 404 };
@@ -277,7 +279,7 @@ exports.logControlUser = async (mail, password) => {
             "code": 200,
             "id": row.admin_id,
             "name": row.name,
-            "pass": row.password,
+            "pass":row.password,
             "mail": row.mail,
             "status": row.status,
             "admin_id": row.admin_id,
@@ -392,10 +394,10 @@ exports.statusUpdateUser = async (index, newData) => {
 exports.chancePass = async (mail, token, newpass, newpassA) => {
   try {
     const decoded = await tokenS.compareRole(token);
-    console.log("decoded exp ==> "+decoded);
+    console.log("decoded exp ==> " + decoded);
     const expirationDate = new Date(decoded.exp * 1000);
     console.log('JWT expires at:', expirationDate);
-    console.log('AAA '+decoded.code);
+    console.log('AAA ' + decoded.code);
     const currentDate = new Date();
     if (currentDate < expirationDate) {
       if (newpass == newpassA) {
@@ -420,7 +422,7 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
           }
           return response;
         }
-      }else{
+      } else {
         let response = {
           code: 4044,
           msg: "Passwords not matched"
@@ -429,20 +431,20 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
       }
 
     } else {
-        console.log('JWT has expired');
-        return {
-            code: 4043,
-            message: 'Forbidden Access Token Expired',
-        };
+      console.log('JWT has expired');
+      return {
+        code: 4043,
+        message: 'Forbidden Access Token Expired',
+      };
     }
-    
 
 
-  } catch(error) {
-    return{
-      code:500,
-      error:error,
-      msg:'An error occurredd.'
+
+  } catch (error) {
+    return {
+      code: 500,
+      error: error,
+      msg: 'An error occurredd.'
     };
   }
 

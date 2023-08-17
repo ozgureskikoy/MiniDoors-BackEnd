@@ -16,16 +16,20 @@ exports.createAdmin = async (name, pass, mail) => {
     );
     let result = {
       code: 200,
-      msg: `Admin created successfully.`
+      payload:{
+        msg: `Admin created successfully.`
+      }
     }
     return result;
   } catch (error) {
-    let result = {
-      code: 4046,
-      msg: error.detail
+    let response = {
+      "code": 5000,
+      "payload": {
+        msg: error
+      }
     }
-    return result;
-    
+    return response
+
   }
 };
 
@@ -58,7 +62,13 @@ exports.readAllAdmin = async () => {
     console.log(list);
     return list;
   } catch (error) {
-    throw error;
+    let response = {
+      "code": 5000,
+      "payload": {
+        msg: error
+      }
+    }
+    return response
   } finally {
     if (client) {
       client.release();
@@ -80,18 +90,33 @@ exports.readAdmin = async (index) => {
 
     const row = queryResult.rows[0];
     if (row) {
-      console.log(`${row.id} ${row.name}`);
-      return [{
-        "id": row.id,
-        "name": row.name,
-        "pass": row.password,
-        "mail": row.mail
-      }];
+      let response = {
+        "code": 200,
+        "payload": {
+          "id": row.id,
+          "name": row.name,
+          "pass": row.password,
+          "mail": row.mail,
+        }
+      }
+      return response
     } else {
-      return;
+      let response = {
+        "code": 4044,
+        "payload": {
+          msg: "Not Found"
+        }
+      }
+      return response
     }
   } catch (error) {
-    throw error;
+    let response = {
+      "code": 5000,
+      "payload": {
+        msg: error
+      }
+    }
+    return response
   }
 };
 
@@ -111,42 +136,68 @@ exports.readByNameAdmin = async (index) => {
     const row = queryResult.rows[0];
     if (row) {
       console.log(`${row.id} ${row.name}`);
-      return [{
-        "id": row.id,
-        "name": row.name,
-        "pass": row.password,
-        "mail": row.mail
-      }];
+      let response = {
+        "code": 200,
+        "payload": {
+          "id": row.id,
+          "name": row.name,
+          "pass": row.password,
+          "mail": row.mail
+        }
+      }
+      return response
     } else {
-      return [];
+      let response = {
+        "code": 4044,
+        "payload": {
+          msg: "Not Found"
+        }
+      }
+      return response
     }
   } catch (error) {
-    throw error;
+    let response = {
+      "code": 5000,
+      "payload": {
+        msg: error
+      }
+    }
+    return response
   }
 };
 
 exports.deleteAdmin = async (index) => {
   try {
     const queryResult = await pool.query(
-      `DELETE FROM admin WHERE admin_id = $1`,
+      `DELETE FROM admin WHERE mail = $1`,
       [index]
     );
 
     if (queryResult.rowCount > 0) {
       let result = {
         code: 200,
-        msg: `Admin with index=${index} deleted successfully.`
+        payload: {
+          msg: `Admin with index=${index} deleted successfully.`
+        }
       }
       return result;
     } else {
       let result = {
         code: 4044,
-        msg: `Admin with index=${index} not found.`
+        payload: {
+          msg: `Admin with index=${index} not found.`
+        }
       }
       return result;
     }
   } catch (error) {
-    throw error;
+    let response = {
+      "code": 5000,
+      "payload": {
+        msg: error
+      }
+    }
+    return response
   }
 };
 
@@ -162,19 +213,30 @@ exports.updateAdmin = async (index, newData) => {
     if (queryResult.rowCount > 0) {
       let result = {
         code: 200,
-        msg: "Data updated successfully."
+        payload: {
+          msg: "Data updated successfully."
+        }
       }
       return result;
     } else {
       let result = {
         code: 4044,
-        msg: "Admin with the specified index not found."
+        payload: {
+          msg: "Admin with the specified index not found."
+        }
       }
       return result;
 
     }
   } catch (error) {
-    throw error;
+    let response = {
+      "code": 5000,
+      "payload": {
+        msg: error
+      }
+    }
+    return response
+
   }
 };
 

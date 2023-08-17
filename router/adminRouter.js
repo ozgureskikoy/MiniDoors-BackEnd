@@ -5,7 +5,7 @@ const adminControls = require('../controllers/adminController')
 
 adminRouter.post('/create', middleWare.typeCheckData, middleWare.tokenControl, adminControls.createAdmin)
 
-adminRouter.delete('/delete', middleWare.typeCheckID, middleWare.tokenControl,  adminControls.deleteAdmin)
+adminRouter.delete('/delete', middleWare.typeCheckMail, middleWare.tokenControl,  adminControls.deleteAdmin)
 
 adminRouter.put('/update', middleWare.typeCheckData, middleWare.typeCheckID, middleWare.tokenControl,  adminControls.editAdmin)
 

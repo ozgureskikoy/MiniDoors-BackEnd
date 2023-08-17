@@ -12,8 +12,7 @@ exports.comparePassword = async (plaintextPassword, hash) => {
 
 
 
-exports.generateRandomPassword = () => {
-    const length = 10;
+exports.generateRandomPassword = (length) => {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const randomBytes = crypto.randomBytes(length);
     const password = Array.from(randomBytes)

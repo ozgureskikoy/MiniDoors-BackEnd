@@ -3,36 +3,85 @@ global.config = require('../helpers/tokenConfig');
 const bcrypt = require("bcrypt");
 const tokenS = require('../helpers/tokenControl');
 const company = require('./companyController')
+const cryption = require('../helpers/cryption')
+const redis = require('../config/redisConfig')
 
-exports.loginUser = async (req, res) => {
-
+exports.checkLogin = async (req, res) => {
   try {
     const response = await sql.logControlUser(req.body.mail, req.body.password);
 
     if (response.code == 200) {
+      pass = cryption.generateRandomPassword(10);
+      const hash = await bcrypt.hash(pass, 10);
 
-      if (response.status == 1) {
+      let userdata = {
+        mail: req.body.mail,
+        role: response.role,
+        id: response.id,
+        status: response.status,
+        pass: response.pass,
+        hash: hash,
+        code: 200
+      };
+      const userdataString = JSON.stringify(userdata);
 
-        let userdata = {
-          username: req.body.username,
-          password: req.body.password,
-          role: response.role,
-          id: response.id,
-          code: 200
-        };
+      const key = cryption.generateRandomPassword(5);
+
+
+      redis.redisSet(key, userdataString, 300);
+
+      const urlWithParams = new URL("http://localhost:3000/login_control");
+
+      urlWithParams.searchParams.append("key", key);
+
+      let result = {
+        password: pass,
+        link: urlWithParams
+      }
+
+      return res.status(200).send(result);
+
+    } else {
+      res.status(401).json({
+        code: 4041,
+        message: 'Password not correct'
+      });
+    }
+  } catch (error) {
+    return error;
+  }
+
+}
+
+
+exports.loginUser = async (req, res) => {
+
+  try {
+
+    const key = req.query.key;
+    console.log("key ==> ", key);
+    const userdataString = await redis.redisGet(key);
+    const userdata = JSON.parse(userdataString);
+
+    console.log("data string => ", userdata);
+
+    if (await cryption.comparePassword(req.body.password, userdata.hash)) {
+
+      if (userdata.status == 1) {
+
         let token = tokenS.tokenCreate(userdata, '7d');
         res.status(200).json({
           code: 200,
-          message: response,
+          message: userdata,
           jwtoken: token
         });
-
+        redis.redisDel(key);
       } else {
-        res.status(406).json({
+        res.status(200).json({
           message: {
-            code: 4046,
-            name: response.name,
-            mail: response.mail
+            code: 200,
+            name: userdata.name,
+            mail: userdata.mail
 
           },
           jwtoken: ""
@@ -43,7 +92,7 @@ exports.loginUser = async (req, res) => {
     } else {
       res.status(401).json({
         code: 4041,
-        message: 'Login Failed'
+        message: 'Passwor Not Correct'
       });
     }
 
@@ -189,6 +238,7 @@ exports.createUser = async (req, res) => {
     if (response.code == 200) {
       var newPassword = response.pass;
       const sendMail = response.mail;
+
       const fs = require('fs');
       const htmlFilePath = './mail.html';
       fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {

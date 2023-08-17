@@ -47,16 +47,21 @@ exports.readByNameDoors = async (index) => {
     if (row) {
 
       return {
+        code: 200,
         id: row.id,
         comp_id: row.comp_id,
-        name: row.name
+        name: row.name,
+        msg:"Door found"
       };
 
     } else {
-      return;
+      return {
+        code:4044,
+        msg:"Door not found"
+      };
     }
   } catch (error) {
-    throw error;
+    return error;
   }
 };
 
@@ -75,10 +80,10 @@ exports.openDoor = async (user_name, door_name) => {
     const startHour = a.allowed_hours_start;
     const endHour = a.allowed_hours_end;
     const today = new Date();
-    const date =today.getDate();
+    const date = today.getDate();
     const month = today.getMonth();
     const year = today.getFullYear();
-    const fullDate =`${date}.${month}.${year}` ;
+    const fullDate = `${date}.${month}.${year}`;
     const utcHours = today.getHours();
     const utcMinutes = today.getMinutes();
     const utcSeconds = today.getSeconds();

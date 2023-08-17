@@ -39,13 +39,21 @@ exports.createCompany = async (name, admin_id) => {
   
       const row = queryResult.rows[0];
       if (row) {
-  
-        return row.id;
+        let response = {
+          code: 200,
+          msg:"Company Found",
+          id:row.id
+        }
+        return response
           
       } else {
-        return ;
+        let response = {
+          code: 4044,
+          msg:"Company Not Found",
+        }
+        return response
       }
     } catch (error) {
-      throw error;
+      return error;
     }
   };

@@ -18,10 +18,31 @@ exports.createAdmin = async (req, res) => {
 
 
 };
+exports.findAdmin = async (req, res) => {
+
+  const response = await sql.readAdmin(req.body.id);
+  if (response) {
+
+    let result = {
+      "code": 200,
+      "meta": "ok",
+      "payload": response
+    }
+    return res.status(200).send(result)
+  } else {
+
+    let result = {
+      "code": 4044,
+      "meta": "User not found"
+    }
+    return res.status(404).send(result)
+  }
+
+};
 
 exports.deleteAdmin = async (req, res) => {
 
-  const response = await sql.deleteAdmin(req.body.id)
+  const response = await sql.deleteAdmin(req.body.mail)
 
   if (response.code==200) {
 
