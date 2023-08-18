@@ -71,7 +71,7 @@ exports.deletePermission = async (req, res) => {
     if (door_id && user_id) {
         if (door_id.payload.comp_id == user_id.comp_id) {
             const q = await this.findPermission(user_id.id, door_id.payload.id);
-            if (q.code != 4044) {
+            if (q.code == 200) {
                 try {
                     await sql.deletePermission(user_id.id, door_id.payload.id);
                     return res.status(200).send({
