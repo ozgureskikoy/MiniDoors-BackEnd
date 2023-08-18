@@ -1,3 +1,4 @@
+const { log } = require('console');
 const pool = require('./dbConfig.js');
 pool.connect(function (err) {
   if (err) {
@@ -13,13 +14,17 @@ exports.createPermission = async (user_id, door_id, allowed_days, allowed_hours_
     );
     let response = {
       code: 200,
-      msg: `Permission created successfully.`
+      payload: {
+        msg: `Permission created successfully.`
+      }
     }
     return response;
   } catch (error) {
     let response = {
       code: 4046,
-      msg: " a " + error
+      payload: {
+        err: error
+      }
     }
     console.log(error)
     return response;
@@ -29,10 +34,10 @@ exports.createPermission = async (user_id, door_id, allowed_days, allowed_hours_
 
 
 exports.findPermission = async (user_id, door_id) => {
-
+  
   try {
     const queryResult = await pool.query(
-      `SELECT permission_id as permission_id,
+      `SELECT id as id,
                   user_id as user_id,
                   door_id as door_id,
                   allowed_days as allowed_days,
@@ -56,12 +61,14 @@ exports.findPermission = async (user_id, door_id) => {
       console.log("This user dont have a permission on this door");
       return {
         code: 4046,
-        meta: "This user dont have a permission on this door"
+        payload:{
+          meta: "This user dont have a permission on this door"
+        }
 
       };
     }
   } catch (error) {
-    throw error;
+    return error;
   }
 };
 
@@ -73,13 +80,18 @@ exports.deletePermission = async (user_id, door_id) => {
     );
     return {
       code: 200,
-      msg: "Permission deleted successfully."
+      payload: {
+        msg: "Permission deleted successfully."
+      }
     };
   } catch (error) {
     console.log(error);
     return {
       code: 500,
-      msg: "Error deleting permission."
+      payload: {
+        msg: "Error deleting permission.",
+        err: error
+      }
     };
   }
 };

@@ -5,9 +5,12 @@ const { access } = require('fs');
 
 exports.createCompany = async (req, res) => {
   const check = await sql.readByNameCompany(req.body.name)
-  if (!check.code == 200) {
+  console.log("company check ==> ",check.payload.msg);
+  console.log("company checkk ==> ",check.code);
+  console.log("company checkkk ==> ",check.code != 200);
+  if (check.code != 200) {
     const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
-
+    console.log("admin id ==> ",admin_id);
     const response = await sql.createCompany(req.body.name, admin_id);
     if (response.code == 200) {
   

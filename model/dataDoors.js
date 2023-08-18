@@ -16,13 +16,18 @@ exports.addDoor = async (name, admin_id, comp_id) => {
     );
     let response = {
       code: 200,
-      msg: `Door added successfully.`
+      payload:{
+        msg: `Door added successfully.`
+      }
     }
     return response;
   } catch (error) {
     let response = {
       code: 4046,
-      msg: "cannot add " + error.detail
+      payload:{
+        msg: "cannot add " + error.detail,
+        err:error
+      }
     }
     console.log(error);
     return response;
@@ -35,7 +40,7 @@ exports.readByNameDoors = async (index) => {
 
   try {
     const queryResult = await pool.query(
-      `SELECT door_id as id,
+      `SELECT id as id,
                   name as name,
                   company_id as comp_id  
            FROM doors
@@ -48,20 +53,29 @@ exports.readByNameDoors = async (index) => {
 
       return {
         code: 200,
-        id: row.id,
-        comp_id: row.comp_id,
-        name: row.name,
-        msg:"Door found"
+        payload:{
+          id: row.id,
+          comp_id: row.comp_id,
+          name: row.name,
+          msg:"Door found"
+        }
       };
 
     } else {
       return {
         code:4044,
-        msg:"Door not found"
+        payload:{
+          msg:"Door not found"
+        }
       };
     }
   } catch (error) {
-    return error;
+    return {
+      code:5000,
+      payload:{
+        msg:error
+      }
+    };
   }
 };
 
@@ -71,14 +85,14 @@ exports.openDoor = async (user_name, door_name) => {
   const doors = await door.findDoorByName(door_name);
   const users = await user.findUserByMail(user_name);
 
-  const a = await perm.findPermission(users.id, doors.id);
+  const sqlResponse = await perm.findPermission(users.id, doors.payload.id);
 
-  if (a.code == 200) {
+  if (sqlResponse.code == 200) {
 
-    const fetchedDay = a.allowed_days;
+    const fetchedDay = sqlResponse.allowed_days;
 
-    const startHour = a.allowed_hours_start;
-    const endHour = a.allowed_hours_end;
+    const startHour = sqlResponse.allowed_hours_start;
+    const endHour = sqlResponse.allowed_hours_end;
     const today = new Date();
     const date = today.getDate();
     const month = today.getMonth();
@@ -94,13 +108,15 @@ exports.openDoor = async (user_name, door_name) => {
 
       let response = {
         code: 200,
-        msg: "Door open",
-        user: users.name,
-        door: doors.name,
-        user_id: users.id,
-        door_id: doors.id,
-        time: currentHour,
-        date: fullDate
+        payload:{
+          msg: "Door open",
+          user: users.name,
+          door: doors.name,
+          user_id: users.id,
+          door_id: doors.id,
+          time: currentHour,
+          date: fullDate
+        }
       };
       return response;
 
@@ -108,14 +124,18 @@ exports.openDoor = async (user_name, door_name) => {
 
       let response = {
         code: 4046,
-        msg: "User dont have permission at this moment"
+        payload:{
+          msg: "User dont have permission at this moment"
+        }
       };
       return response;
     }
   } else {
     let response = {
       code: 4044,
-      msg: "User dont have permission"
+      payload:{
+        msg: "User dont have permission"
+      }
     };
     return response;
   }

@@ -24,15 +24,19 @@ exports.createUser = async (name, mail, admin_id, comp_id) => {
     );
     let response = {
       code: 200,
-      msg: `User created successfully.`,
-      mail: mail
+      payload: {
+        msg: `User created successfully.`,
+        mail: mail
+      }
     }
     log.passLog(`user = ${mail} pass= ${pass}`);
     return response;
   } catch (error) {
     let response = {
       code: 4046,
-      msg: error
+      payload: {
+        err: error.detail
+      }
     }
     return response;
 
@@ -47,7 +51,7 @@ exports.readAllUser = async () => {
     client = await pool.connect();
     const list = [];
     const queryResult = await client.query(`
-        SELECT key as id,
+        SELECT id as id,
                name as name,
                password as password,
                mail as mail,
@@ -69,10 +73,24 @@ exports.readAllUser = async () => {
       });
     });
 
+    let response = {
+      code: 200,
+      payload: {
+        msg: "Users fetched sucsessfully",
+        list: list
+      }
+    }
 
     return list;
   } catch (error) {
-    throw error;
+    let response = {
+      code: 5000,
+      payload: {
+        msg: 'Server error',
+        err: error
+      }
+    }
+    return response;
   } finally {
     if (client) {
       client.release();
@@ -83,7 +101,7 @@ exports.readAllUser = async () => {
 exports.readUser = async (index) => {
   try {
     const queryResult = await pool.query(
-      `SELECT key as id,
+      `SELECT id as id,
                name as name,
                password as password,
                mail as mail,
@@ -91,7 +109,7 @@ exports.readUser = async (index) => {
                admin_id as admin_id,
                company_id as company_id
          FROM users
-         WHERE key = $1`,
+         WHERE id = $1`,
       [index]
     );
 
@@ -119,7 +137,7 @@ exports.readByNameUser = async (index) => {
 
   try {
     const queryResult = await pool.query(
-      `SELECT key as id,
+      `SELECT id as id,
                 name as name,
                 password as password,
                 mail as mail,
@@ -159,7 +177,7 @@ exports.readByMailUser = async (index) => {
 
   try {
     const queryResult = await pool.query(
-      `SELECT key as id,
+      `SELECT   id as id,
                 name as name,
                 password as password,
                 mail as mail,
@@ -240,24 +258,33 @@ exports.logControlUser = async (mail, password) => {
 
           return {
             "code": 200,
-            "id": row.admin_id,
-            "pass":row.password,
-            "name": row.name,
-            "mail": row.mail,
-            "status": row.status,
-            "role": b[0]
+            payload: {
+              "id": row.id,
+              "name": row.name,
+              "mail": row.mail,
+              "status": row.status,
+              "role": b[0]
+            }
           };
         } else {
           return {
-            msg: "Şifre hatalı",
-            code: 404
+            code: 4044,
+            payload: {
+              msg: "Şifre hatalı",
+            }
           };
         }
       } else {
         return { code: 404 };
       }
     } catch (error) {
-      return error;
+      let response = {
+        code: 500,
+        payload: {
+          err: error
+        }
+      }
+      return response;
     }
   } else if (b == "admin") {
     try {
@@ -277,18 +304,21 @@ exports.logControlUser = async (mail, password) => {
         if (passwordMatch) {
           return {
             "code": 200,
-            "id": row.admin_id,
-            "name": row.name,
-            "pass":row.password,
-            "mail": row.mail,
-            "status": row.status,
-            "admin_id": row.admin_id,
-            "role": b[0]
+            payload:{
+              "id": row.id,
+              "name": row.name,
+              "pass": row.password,
+              "mail": row.mail,
+              "status": row.status,
+              "role": b[0]
+            }
           };
         } else {
           return {
-            msg: "Şifre hatalı",
-            code: 404
+            code: 4044,
+            payload:{
+              msg: "Şifre hatalı"
+            }
           };
         }
       } else {
@@ -317,13 +347,17 @@ exports.deleteUser = async (index) => {
     if (queryResult.rowCount > 0) {
       let response = {
         code: 200,
-        msg: `User with index=${index} deleted successfully.`
+        payload:{
+          msg: `User with index=${index} deleted successfully.`
+        }
       }
       return response;
     } else {
       let response = {
         code: 4044,
-        msg: `User with index=${index} not found.`
+        payload:{
+          msg: `User with index=${index} not found.`
+        }
       }
       return response;
     }
@@ -337,20 +371,24 @@ exports.updateUser = async (index, newData) => {
     const queryResult = await pool.query(
       `UPDATE users
          SET name = $1
-         WHERE key = $2`,
+         WHERE id = $2`,
       [newData, index]
     );
 
     if (queryResult.rowCount > 0) {
       let response = {
         code: 200,
-        msg: "Data updated successfully."
+        payload:{
+          msg: "Data updated successfully."
+        }
       }
       return response;
     } else {
       let response = {
         code: 4044,
-        msg: "User with the specified index not found."
+        payload:{
+          msg: "User with the specified index not found."
+        }
       }
       return response;
 
@@ -368,20 +406,24 @@ exports.statusUpdateUser = async (index, newData) => {
     const queryResult = await pool.query(
       `UPDATE users
          SET status = $1
-         WHERE key = $2`,
+         WHERE id = $2`,
       [newData, index]
     );
 
     if (queryResult.rowCount > 0) {
       let response = {
         code: 200,
-        msg: "Status updated successfully."
+        payload:{
+          msg: "Status updated successfully."
+        }
       }
       return response;
     } else {
       let response = {
         code: 4044,
-        msg: "User with the specified index not found."
+        payload:{
+          msg: "User with the specified index not found."
+        }
       }
       return response;
     }
@@ -411,21 +453,27 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
         if (queryResult.rowCount > 0) {
           let response = {
             code: 200,
-            msg: "Password updated."
+            payload:{
+              msg: "Password updated."
+            }
           }
           log.passLog(`user = ${mail} pass= ${newpass}`);
           return response;
         } else {
           let response = {
             code: 4044,
-            msg: "User information is incorrect."
+            payload:{
+              msg: "User information is incorrect."
+            }
           }
           return response;
         }
       } else {
         let response = {
           code: 4044,
-          msg: "Passwords not matched"
+          payload:{
+            msg: "Passwords not matched"
+          }
         }
         return response;
       }
@@ -434,7 +482,9 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
       console.log('JWT has expired');
       return {
         code: 4043,
-        message: 'Forbidden Access Token Expired',
+        payload:{
+          message: 'Forbidden Access Token Expired',
+        }
       };
     }
 
@@ -470,14 +520,18 @@ exports.forgotPass = async (mail) => {
 
     let response = {
       code: 200,
-      msg: myUrlWithParams
+      payload:{
+        msg: myUrlWithParams
+      }
     }
     return response;
 
   } else {
     let response = {
       code: 4044,
-      msg: "mail incorrect"
+      payload:{
+        msg: "mail incorrect"
+      }
     }
     return response;
 

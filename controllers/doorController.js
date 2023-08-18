@@ -57,7 +57,7 @@ exports.findDoorByName = async (name) => {
 exports.openDoor = async (req, res) => {
     const response = await sql.openDoor(req.body.mail, req.body.door);
     if (response.code==200) {
-       log.createLog(response.user_id,response.door_id)
+       log.createLog(response.user_id,response.id)
         return res.status(200).send(response)
     }else if (response.code==4046) {
         

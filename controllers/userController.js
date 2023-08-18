@@ -13,16 +13,17 @@ exports.checkLogin = async (req, res) => {
     if (response.code == 200) {
       pass = cryption.generateRandomPassword(10);
       const hash = await bcrypt.hash(pass, 10);
-
+      
       let userdata = {
         mail: req.body.mail,
-        role: response.role,
-        id: response.id,
-        status: response.status,
-        pass: response.pass,
+        role: response.payload.role,
+        id: response.payload.id,
+        status: response.payload.status,
+        pass: response.payload.pass,
         hash: hash,
         code: 200
       };
+      console.log("userdata ==> ",userdata);
       const userdataString = JSON.stringify(userdata);
 
       const key = cryption.generateRandomPassword(5);
@@ -72,8 +73,10 @@ exports.loginUser = async (req, res) => {
         let token = tokenS.tokenCreate(userdata, '7d');
         res.status(200).json({
           code: 200,
-          message: userdata,
-          jwtoken: token
+          payload:{
+            message: userdata,
+            jwtoken: token
+          }
         });
         redis.redisDel(key);
       } else {
@@ -112,7 +115,7 @@ exports.forgotPass = async (req, res) => {
   if (response.code == 200) {
     let result = {
       code: response.code,
-      msg: response.msg
+      msg: response.payload.msg
     }
 
     // var newPassword = response.pass;
@@ -230,7 +233,9 @@ exports.findUserByMail = async (mail) => {
 
 
 exports.createUser = async (req, res) => {
-  const comp_id = await company.findCompanyByName(req.body.comp);
+  const comp = await company.findCompanyByName(req.body.comp);
+  const comp_id = comp.payload.id
+  console.log('comp_id ==> ', comp_id);
   if (comp_id) {
 
     const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);

@@ -10,16 +10,16 @@ exports.createPermission = async (req, res) => {
     const door_id = await door.findDoorByName(req.body.door);
     const user_id = await user.findUserByMail(req.body.mail);
 
-    console.log("door==> "+door_id.code);
+    console.log("door==> "+door_id.payload.comp_id);
     console.log("user==> "+user_id.comp_id);
     if (door_id && user_id) {
 
-        if (door_id.comp_id == user_id.comp_id) {
+        if (door_id.payload.comp_id == user_id.comp_id) {
             const q = await this.findPermission(user_id.id, door_id.id);
 
             if (q.code == 4046) {
 
-                const response = await sql.createPermission(user_id.id, door_id.id, req.body.days, req.body.start, req.body.end)
+                const response = await sql.createPermission(user_id.id, door_id.payload.id, req.body.days, req.body.start, req.body.end)
 
                 if (response.code == 200) {
                     return res.status(200).send(response)
@@ -63,15 +63,17 @@ exports.findPermission = async (user_id, door_id) => {
 
 exports.deletePermission = async (req, res) => {
     const door_id = await door.findDoorByName(req.body.door);
-    const user_id = await user.findDoorByNamewIndex(req.body.user);
+    const user_id = await user.findUserByMail(req.body.mail);
+    console.log("find user ==>", user_id);
+    console.log("find  ==>", door_id && user_id);
+    console.log("find d ==>",door_id.payload.comp_id == user_id.comp_id);
 
     if (door_id && user_id) {
-        if (door_id.comp_id == user_id.comp_id) {
-            const q = await this.findPermission(user_id.id, door_id.id);
-
-            if (q.code == 4044) {
+        if (door_id.payload.comp_id == user_id.comp_id) {
+            const q = await this.findPermission(user_id.id, door_id.payload.id);
+            if (q.code != 4044) {
                 try {
-                    await sql.deletePermission(user_id.id, door_id.id);
+                    await sql.deletePermission(user_id.id, door_id.payload.id);
                     return res.status(200).send({
                         code: 200,
                         msg: "Permission deleted successfully."

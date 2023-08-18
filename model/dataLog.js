@@ -12,14 +12,19 @@ exports.createLog = async (user_id, door_id) => {
     );
     let response = {
       code: 200,
-      msg: `Log created successfully.`,
+      payload:{
+        msg: `Log created successfully.`,
+      }
     }
     console.log(`Log created successfully.`);
     return response;
   } catch (error) {
     let response = {
       code: 4046,
-      msg: error
+      payload:{
+        msg: "Log can not created",
+        err:error
+      }
     }
     return response;
   }
@@ -34,14 +39,19 @@ exports.getLogs = async (pageSize, page, sortColumn = 'time', sortOrder = 'desc'
 
     return {
       code: 200,
-      msg: 'Logs fetched successfully.',
-      logs: queryResult.rows
+      payload:{
+        msg: 'Logs fetched successfully.',
+        logs: queryResult.rows
+      }
     };
   } catch (error) {
     console.log(error);
     return {
       code: 5000,
-      msg: 'Internal server errorr.'
+      payload:{
+        msg: 'Internal server errorr.',
+        err:error
+      }
     };
   }
 };

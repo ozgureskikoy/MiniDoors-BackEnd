@@ -25,7 +25,7 @@ exports.createAdmin = async (name, pass, mail) => {
     let response = {
       "code": 5000,
       "payload": {
-        msg: error
+        msg: error.detail
       }
     }
     return response
@@ -40,7 +40,7 @@ exports.readAllAdmin = async () => {
     client = await pool.connect();
     const list = [];
     const queryResult = await client.query(`
-        SELECT admin_id as id,
+        SELECT id as id,
                name as name,
                password as password,
                mail as mail,
@@ -50,7 +50,7 @@ exports.readAllAdmin = async () => {
 
     queryResult.rows.forEach((row) => {
       list.push({
-        id: row.admin_id,
+        id: row.id,
         name: row.name,
         pass: row.password,
         mail: row.mail,
@@ -79,12 +79,12 @@ exports.readAllAdmin = async () => {
 exports.readAdmin = async (index) => {
   try {
     const queryResult = await pool.query(
-      `SELECT admin_id as id,
+      `SELECT id as id,
                 name as name,
                 password as password,
                 mail as mail
          FROM admin
-         WHERE admin_id = $1`,
+         WHERE id = $1`,
       [index]
     );
 
@@ -124,7 +124,7 @@ exports.readByNameAdmin = async (index) => {
   console.log(`index=${index}`);
   try {
     const queryResult = await pool.query(
-      `SELECT admin_id as id,
+      `SELECT id as id,
                 name as name,
                 password as password,
                 mail as mail
@@ -206,7 +206,7 @@ exports.updateAdmin = async (index, newData) => {
     const queryResult = await pool.query(
       `UPDATE admin
          SET name = $1
-         WHERE admin_id = $2`,
+         WHERE id = $2`,
       [newData, index]
     );
 
@@ -247,7 +247,7 @@ exports.statusUpdateAdmin = async (index, newData) => {
     const queryResult = await pool.query(
       `UPDATE admin
          SET status = $1
-         WHERE admin_id = $2`,
+         WHERE id = $2`,
       [newData, index]
     );
 
