@@ -13,7 +13,7 @@ exports.checkLogin = async (req, res) => {
     if (response.code == 200) {
       pass = cryption.generateRandomPassword(10);
       const hash = await bcrypt.hash(pass, 10);
-      
+
       let userdata = {
         mail: req.body.mail,
         role: response.payload.role,
@@ -21,9 +21,10 @@ exports.checkLogin = async (req, res) => {
         status: response.payload.status,
         pass: response.payload.pass,
         hash: hash,
+        comp: response.payload.comp,
         code: 200
       };
-      console.log("userdata ==> ",userdata);
+      console.log("userdata ==> ", userdata);
       const userdataString = JSON.stringify(userdata);
 
       const key = cryption.generateRandomPassword(5);
@@ -65,6 +66,7 @@ exports.loginUser = async (req, res) => {
     const userdata = JSON.parse(userdataString);
 
     console.log("data string => ", userdata);
+    console.log("data admin role => ", userdata.role);
 
     if (await cryption.comparePassword(req.body.password, userdata.hash)) {
 
@@ -73,7 +75,7 @@ exports.loginUser = async (req, res) => {
         let token = tokenS.tokenCreate(userdata, '7d');
         res.status(200).json({
           code: 200,
-          payload:{
+          payload: {
             message: userdata,
             jwtoken: token
           }
@@ -174,8 +176,6 @@ exports.allUser = async (req, res) => {
     "payload": response
   }
 
-
-
   return res.status(200).send(result)
 };
 
@@ -233,16 +233,32 @@ exports.findUserByMail = async (mail) => {
 
 
 exports.createUser = async (req, res) => {
-  const comp = await company.findCompanyByName(req.body.comp);
-  const comp_id = comp.payload.id
-  console.log('comp_id ==> ', comp_id);
+  const admin = await tokenS.tokenRead(req.headers['x-access-token']);
+  const admin_id = admin.id
+  console.log("admin_id ==> ",admin_id);
+  
+  const admin_rolee = admin.role
+  const admin_role =admin_rolee+"_id"
+
+  let comp_id
+  
+  if (admin_rolee == "admin") {
+    const comp = await company.findCompanyByName(req.body.comp);
+    comp_id = comp.payload.id
+    console.log('comp_id for admin ==> ', comp_id);
+  }else{
+    comp_id = admin.comp
+    console.log('comp_id for subadmin ==> ', comp_id);
+  }
+  
   if (comp_id) {
 
-    const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
-    const response = await sql.createUser(req.body.name, req.body.mail, admin_id, comp_id);
+
+    const response = await sql.createUser(req.body.name, req.body.surname, req.body.mail, admin_id, comp_id, admin_role);
+
     if (response.code == 200) {
-      var newPassword = response.pass;
-      const sendMail = response.mail;
+      var newPassword = response.payload.pass;
+      const sendMail = response.payload.mail;
 
       const fs = require('fs');
       const htmlFilePath = './mail.html';
@@ -260,11 +276,24 @@ exports.createUser = async (req, res) => {
           }
         });
       });
-      return res.status(200).send(response)
+      let result = {
+        code: response.code,
+        payload: {
+          msg: response.payload.msg
+        }
+      }
+      return res.status(200).send(result)
 
 
     } else {
-      return res.status(406).send(response)
+      let result = {
+        code: response.code,
+        payload: {
+          msg: response.payload.err
+        }
+      }
+
+      return res.status(406).send(result)
 
     }
   } else {
@@ -278,15 +307,15 @@ exports.createUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
 
-  const a = await sql.deleteUser(req.body.mail)
+  const response = await sql.deleteUser(req.body.mail)
 
-  if (a.code == 200) {
+  if (response.code == 200) {
 
-    return res.status(200).send(a)
+    return res.status(200).send(response)
 
 
   } else {
-    return res.status(404).send(a)
+    return res.status(404).send(response)
 
   }
 

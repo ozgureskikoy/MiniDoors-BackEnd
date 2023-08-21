@@ -10,7 +10,7 @@ exports.getLogs = async (req, res) => {
         const response = await sql.getLogs(pageSize, page, sort, order);
 
         const logsWithFormattedTime = [];
-        for (const log of response.payload.logs) {
+        for (const log of response.logs) {
             const timestamp = log.time;
             console.log("Raw timestamp:", timestamp);
 

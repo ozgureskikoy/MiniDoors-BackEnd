@@ -14,24 +14,26 @@ pool.connect(function (err) {
   }
 })
 
-exports.createUser = async (name, mail, admin_id, comp_id) => {
+exports.createUser = async (name, surname, mail, admin_id, comp_id, admin_role) => {
   try {
     pass = cryption.generateRandomPassword(10);
     const hash = await bcrypt.hash(pass, 10);
     await pool.query(
-      `INSERT INTO users(name, password, mail, admin_id, company_id) VALUES($1, $2, $3, $4, $5)`,
-      [name, hash, mail, admin_id, comp_id]
+      `INSERT INTO users(name, surname, password, mail, ${admin_role}, company_id) VALUES($1, $2, $3, $4, $5, $6)`,
+      [name, surname, hash, mail, admin_id, comp_id]
     );
     let response = {
       code: 200,
       payload: {
         msg: `User created successfully.`,
-        mail: mail
+        mail: mail,
+        pass: pass
       }
     }
     log.passLog(`user = ${mail} pass= ${pass}`);
     return response;
   } catch (error) {
+    console.log("err==>> ", error);
     let response = {
       code: 4046,
       payload: {
@@ -53,6 +55,7 @@ exports.readAllUser = async () => {
     const queryResult = await client.query(`
         SELECT id as id,
                name as name,
+               surname as surname,
                password as password,
                mail as mail,
                status as status,
@@ -65,6 +68,7 @@ exports.readAllUser = async () => {
       list.push({
         id: row.id,
         name: row.name,
+        surname: row.surname,
         pass: row.password,
         mail: row.mail,
         status: row.status,
@@ -81,7 +85,7 @@ exports.readAllUser = async () => {
       }
     }
 
-    return list;
+    return response;
   } catch (error) {
     let response = {
       code: 5000,
@@ -222,6 +226,10 @@ async function findUserTypeByEmail(email) {
     SELECT 'admin' AS user_type
     FROM admin
     WHERE mail = $1
+    UNION
+    SELECT 'subadmin' AS user_type
+    FROM subadmin
+    WHERE mail = $1
     
   `;
 
@@ -230,17 +238,22 @@ async function findUserTypeByEmail(email) {
     const resTable = result.rows.map(row => row.user_type);
     return resTable;
   } catch (error) {
-    throw error;
+    let response = {
+      code: 5000,
+      err: error
+    }
+    return response;
   }
 }
 
 
+
 exports.logControlUser = async (mail, password) => {
 
-
-  const b = await findUserTypeByEmail(mail);
-
-  if (b == "user") {
+  console.log("in find type");
+  const userType = await findUserTypeByEmail(mail);
+  console.log("mail in ==>> ", userType[0]);
+  if (userType == "user") {
 
     try {
       const queryResult = await pool.query(
@@ -263,7 +276,7 @@ exports.logControlUser = async (mail, password) => {
               "name": row.name,
               "mail": row.mail,
               "status": row.status,
-              "role": b[0]
+              "role": userType[0]
             }
           };
         } else {
@@ -286,7 +299,7 @@ exports.logControlUser = async (mail, password) => {
       }
       return response;
     }
-  } else if (b == "admin") {
+  } else if (userType == "admin") {
     try {
       const queryResult = await pool.query(
         `SELECT *
@@ -304,19 +317,59 @@ exports.logControlUser = async (mail, password) => {
         if (passwordMatch) {
           return {
             "code": 200,
-            payload:{
+            payload: {
               "id": row.id,
               "name": row.name,
-              "pass": row.password,
               "mail": row.mail,
               "status": row.status,
-              "role": b[0]
+              "role": userType[0]
             }
           };
         } else {
           return {
             code: 4044,
-            payload:{
+            payload: {
+              msg: "Şifre hatalı"
+            }
+          };
+        }
+      } else {
+        return { code: 404 };
+      }
+    } catch (error) {
+      return error;
+    }
+  } else if (userType == "subadmin") {
+    try {
+      const queryResult = await pool.query(
+        `SELECT *
+           FROM subadmin
+           WHERE mail = $1`,
+        [mail]
+      );
+
+
+      const row = queryResult.rows[0];
+      if (row) {
+
+        const passwordMatch = await cryption.comparePassword(password, row.password);
+
+        if (passwordMatch) {
+          return {
+            "code": 200,
+            payload: {
+              "id": row.id,
+              "name": row.name,
+              "mail": row.mail,
+              "status": row.status,
+              comp: row.comp_id,
+              "role": userType[0]
+            }
+          };
+        } else {
+          return {
+            code: 4044,
+            payload: {
               msg: "Şifre hatalı"
             }
           };
@@ -347,7 +400,7 @@ exports.deleteUser = async (index) => {
     if (queryResult.rowCount > 0) {
       let response = {
         code: 200,
-        payload:{
+        payload: {
           msg: `User with index=${index} deleted successfully.`
         }
       }
@@ -355,7 +408,7 @@ exports.deleteUser = async (index) => {
     } else {
       let response = {
         code: 4044,
-        payload:{
+        payload: {
           msg: `User with index=${index} not found.`
         }
       }
@@ -378,7 +431,7 @@ exports.updateUser = async (index, newData) => {
     if (queryResult.rowCount > 0) {
       let response = {
         code: 200,
-        payload:{
+        payload: {
           msg: "Data updated successfully."
         }
       }
@@ -386,7 +439,7 @@ exports.updateUser = async (index, newData) => {
     } else {
       let response = {
         code: 4044,
-        payload:{
+        payload: {
           msg: "User with the specified index not found."
         }
       }
@@ -413,7 +466,7 @@ exports.statusUpdateUser = async (index, newData) => {
     if (queryResult.rowCount > 0) {
       let response = {
         code: 200,
-        payload:{
+        payload: {
           msg: "Status updated successfully."
         }
       }
@@ -421,7 +474,7 @@ exports.statusUpdateUser = async (index, newData) => {
     } else {
       let response = {
         code: 4044,
-        payload:{
+        payload: {
           msg: "User with the specified index not found."
         }
       }
@@ -453,7 +506,7 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
         if (queryResult.rowCount > 0) {
           let response = {
             code: 200,
-            payload:{
+            payload: {
               msg: "Password updated."
             }
           }
@@ -462,7 +515,7 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
         } else {
           let response = {
             code: 4044,
-            payload:{
+            payload: {
               msg: "User information is incorrect."
             }
           }
@@ -471,7 +524,7 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
       } else {
         let response = {
           code: 4044,
-          payload:{
+          payload: {
             msg: "Passwords not matched"
           }
         }
@@ -482,7 +535,7 @@ exports.chancePass = async (mail, token, newpass, newpassA) => {
       console.log('JWT has expired');
       return {
         code: 4043,
-        payload:{
+        payload: {
           message: 'Forbidden Access Token Expired',
         }
       };
@@ -520,7 +573,7 @@ exports.forgotPass = async (mail) => {
 
     let response = {
       code: 200,
-      payload:{
+      payload: {
         msg: myUrlWithParams
       }
     }
@@ -529,7 +582,7 @@ exports.forgotPass = async (mail) => {
   } else {
     let response = {
       code: 4044,
-      payload:{
+      payload: {
         msg: "mail incorrect"
       }
     }

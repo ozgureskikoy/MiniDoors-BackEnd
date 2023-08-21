@@ -4,8 +4,7 @@ exports.createLog = async (user_id, door_id) => {
   try {
     const currentDate = new Date();
     const timestamp = Math.floor(Date.parse(currentDate) / 1000);
-    console.log("currentDate ==>", currentDate);
-    console.log("currentDate ==>", timestamp);
+    
     await pool.query(
       `INSERT INTO logs (time, user_id, door_id) VALUES ($1, $2, $3)`,
       [timestamp, user_id, door_id]
@@ -36,13 +35,11 @@ exports.getLogs = async (pageSize, page, sortColumn = 'time', sortOrder = 'desc'
     const queryResult = await pool.query(
       `SELECT * FROM logs ORDER BY ${sortColumn} ${sortOrder} LIMIT ${pageSize} OFFSET ${offset}`
     );
-
+ 
     return {
       code: 200,
-      payload:{
-        msg: 'Logs fetched successfully.',
-        logs: queryResult.rows
-      }
+      msg: 'Logs fetched successfully.',
+      logs: queryResult.rows
     };
   } catch (error) {
     console.log(error);

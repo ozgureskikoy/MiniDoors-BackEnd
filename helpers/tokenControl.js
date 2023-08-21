@@ -36,7 +36,7 @@ exports.tokenRead = async (token) => {
  
     const decodedToken = await this.compareRole(accessToken);
   
-    return await decodedToken.id;
+    return await decodedToken;
 
   } catch (error) {
     console.error('Error:', error);

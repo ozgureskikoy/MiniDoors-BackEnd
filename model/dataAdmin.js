@@ -1,5 +1,4 @@
 const cryption = require('../helpers/cryption');
-
 const pool = require('./dbConfig');
 
 pool.connect(function (err) {
@@ -8,15 +7,15 @@ pool.connect(function (err) {
   }
 })
 
-exports.createAdmin = async (name, pass, mail) => {
+exports.createAdmin = async (name, surname, pass, mail) => {
   try {
     await pool.query(
-      `INSERT INTO admin(name, password, mail) VALUES($1, $2, $3)`,
-      [name, pass, mail]
+      `INSERT INTO admin(name, surname, password, mail) VALUES($1, $2, $3, $4)`,
+      [name, surname, pass, mail]
     );
     let result = {
       code: 200,
-      payload:{
+      payload: {
         msg: `Admin created successfully.`
       }
     }

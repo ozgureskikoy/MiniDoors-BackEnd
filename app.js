@@ -1,10 +1,10 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
-const bodyParser = require('body-parser');
+const Parser = require('body-parser');
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(Parser.urlencoded({ extended: true }));
+app.use(Parser.json());
 
 const port = 3000;  
 
@@ -25,6 +25,9 @@ app.use('/perm', permRouter);
 
 const logRouter = require('./router/logRouter');
 app.use('/log', logRouter);
+
+const sadminRouter = require('./router/subadminRouter');
+app.use('/sadmin', sadminRouter);
 
 const { checkLogin } = require('./controllers/userController');
 app.use('/login', checkLogin)

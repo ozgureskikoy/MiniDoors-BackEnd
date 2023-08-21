@@ -5,22 +5,37 @@ const company = require('./companyController');
 const log = require('../model/dataLog');
 
 exports.addDoor = async (req, res) => {
-    const comp = await company.findCompanyByName(req.body.comp)
-    const door = await sql.readByNameDoors(req.body.name)
-    console.log("company => " + comp.id)
-    console.log("doorcode==> ", door.code);
-    console.log("door name ==> ", req.body.name);
-    if (door.code==4044) {
-        
-        if (comp.code==200) {
+    const admin = await tokenS.tokenRead(req.headers['x-access-token']);
+    const admin_id = admin.id
+    const admin_rolee = admin.role
+    const admin_role = admin_rolee + "_id"
+    console.log("admin= " + admin_id)
+    let comp_id
+    let comp_check
+    if (admin_rolee == "admin") {
+        const comp = await company.findCompanyByName(req.body.comp);
+        comp_id = comp.payload.id
+        console.log('comp_id for admin ==> ', comp_id);
+        comp_check = comp.code
+    } else {
+        comp_id = admin.comp
+        console.log('comp_id for subadmin ==> ', comp_id);
+        comp_check = 200
+    }
 
-            const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
-            console.log("admin= " + admin_id)
-            const response = await sql.addDoor(req.body.name, admin_id, comp.id);
+    const door = await sql.readByNameDoors(req.body.name)
+
+
+    if (door.code == 4044) {
+
+        if (comp_check == 200) {
+
+
+            const response = await sql.addDoor(req.body.name, admin_id, comp_id, admin_role);
             if (response.code == 200) {
-    
+
                 return res.status(200).send(response)
-    
+
             } else {
                 return res.status(406).send(response)
             }
@@ -29,14 +44,14 @@ exports.addDoor = async (req, res) => {
                 code: 4044,
                 msg: "Company not found"
             })
-        } 
-    }else{
+        }
+    } else {
         return res.status(404).send({
             code: 4044,
             msg: "Door with same name exist"
         })
     }
-    
+
 
 };
 
@@ -56,14 +71,17 @@ exports.findDoorByName = async (name) => {
 
 exports.openDoor = async (req, res) => {
     const response = await sql.openDoor(req.body.mail, req.body.door);
-    if (response.code==200) {
-       log.createLog(response.user_id,response.id)
+    if (response.code == 200) {
+        console.log("user r==> ", response.payload.msg);
+        console.log("user r==> ", response.payload.user_id);
+        console.log("door r==> ", response.payload.door_id);
+        log.createLog(response.payload.user_id, response.payload.door_id)
         return res.status(200).send(response)
-    }else if (response.code==4046) {
-        
-        return res.status(406).send(response)        
-    }else{
-        
+    } else if (response.code == 4046) {
+
+        return res.status(406).send(response)
+    } else {
+
         return res.status(404).send(response)
     }
 

@@ -5,44 +5,46 @@ const { access } = require('fs');
 
 exports.createCompany = async (req, res) => {
   const check = await sql.readByNameCompany(req.body.name)
-  console.log("company check ==> ",check.payload.msg);
-  console.log("company checkk ==> ",check.code);
-  console.log("company checkkk ==> ",check.code != 200);
+
   if (check.code != 200) {
-    const admin_id = await tokenS.tokenRead(req.headers['x-access-token']);
-    console.log("admin id ==> ",admin_id);
+    const admin = await tokenS.tokenRead(req.headers['x-access-token']);
+    const admin_id = admin.id
     const response = await sql.createCompany(req.body.name, admin_id);
     if (response.code == 200) {
-  
+
       return res.status(200).send(response)
-  
-  
+
+
     } else {
       return res.status(406).send(response)
-  
+
     }
-  
-  }else{
-    let response={
-      code:4046,
-      msg:"There is another company with same name"
+
+  } else {
+    let response = {
+      code: 4066,
+      payload: {
+        msg: "There is another company with same name"
+      }
     }
     return res.status(406).send(response)
   }
-  
+
 };
 
 exports.findCompanyByName = async (name) => {
 
   const response = await sql.readByNameCompany(name);
-  if (response.code==200) {
+  if (response.code == 200) {
 
     return response;
   } else {
 
     return {
-      code:4044,
-      msg:"Company not found"
+      code: 4044,
+      payload:{
+        msg: "Company not found"
+      }
     };
   }
 

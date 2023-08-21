@@ -58,7 +58,7 @@ exports.tokenControl = [
     async (req, res, next) => {
         var token = req.headers['x-access-token'];
         const decodedToken = await tokenS.compareRole(token);
-        if (decodedToken.role == "admin") {
+        if (decodedToken.role == "admin" || "subadmin") {
             const expirationDate = new Date(decodedToken.exp * 1000);
             console.log('JWT expires at:', expirationDate);
 
@@ -69,7 +69,7 @@ exports.tokenControl = [
                 console.log('JWT has expired');
                 return res.status(403).json({
                     code: "4043",
-                    message: 'Forbidden Access Token Expired',
+                    message: 'Access Token Expired',
                 });
             }
 

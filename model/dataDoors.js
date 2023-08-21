@@ -8,15 +8,15 @@ pool.connect(function (err) {
   }
 })
 
-exports.addDoor = async (name, admin_id, comp_id) => {
+exports.addDoor = async (name, admin_id, comp_id, admin_role) => {
   try {
     await pool.query(
-      `INSERT INTO doors(name, admin_id, company_id) VALUES($1, $2, $3)`,
+      `INSERT INTO doors(name, ${admin_role}, company_id) VALUES($1, $2, $3)`,
       [name, admin_id, comp_id]
     );
     let response = {
       code: 200,
-      payload:{
+      payload: {
         msg: `Door added successfully.`
       }
     }
@@ -24,9 +24,9 @@ exports.addDoor = async (name, admin_id, comp_id) => {
   } catch (error) {
     let response = {
       code: 4046,
-      payload:{
+      payload: {
         msg: "cannot add " + error.detail,
-        err:error
+        err: error
       }
     }
     console.log(error);
@@ -40,7 +40,7 @@ exports.readByNameDoors = async (index) => {
 
   try {
     const queryResult = await pool.query(
-      `SELECT id as id,
+      `SELECT     id as id,
                   name as name,
                   company_id as comp_id  
            FROM doors
@@ -53,27 +53,27 @@ exports.readByNameDoors = async (index) => {
 
       return {
         code: 200,
-        payload:{
+        payload: {
           id: row.id,
           comp_id: row.comp_id,
           name: row.name,
-          msg:"Door found"
+          msg: "Door found"
         }
       };
 
     } else {
       return {
-        code:4044,
-        payload:{
-          msg:"Door not found"
+        code: 4044,
+        payload: {
+          msg: "Door not found"
         }
       };
     }
   } catch (error) {
     return {
-      code:5000,
-      payload:{
-        msg:error
+      code: 5000,
+      payload: {
+        msg: error
       }
     };
   }
@@ -84,9 +84,8 @@ exports.openDoor = async (user_name, door_name) => {
 
   const doors = await door.findDoorByName(door_name);
   const users = await user.findUserByMail(user_name);
-
+  
   const sqlResponse = await perm.findPermission(users.id, doors.payload.id);
-
   if (sqlResponse.code == 200) {
 
     const fetchedDay = sqlResponse.allowed_days;
@@ -108,12 +107,12 @@ exports.openDoor = async (user_name, door_name) => {
 
       let response = {
         code: 200,
-        payload:{
+        payload: {
           msg: "Door open",
           user: users.name,
-          door: doors.name,
+          door: doors.payload.name,
           user_id: users.id,
-          door_id: doors.id,
+          door_id: doors.payload.id,
           time: currentHour,
           date: fullDate
         }
@@ -124,7 +123,7 @@ exports.openDoor = async (user_name, door_name) => {
 
       let response = {
         code: 4046,
-        payload:{
+        payload: {
           msg: "User dont have permission at this moment"
         }
       };
@@ -133,7 +132,7 @@ exports.openDoor = async (user_name, door_name) => {
   } else {
     let response = {
       code: 4044,
-      payload:{
+      payload: {
         msg: "User dont have permission"
       }
     };
