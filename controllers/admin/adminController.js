@@ -1,4 +1,4 @@
-const sql = require('../model/dataAdmin');
+const sql = require('../../model/dataAdmin');
 const bcrypt = require("bcrypt");
 
 

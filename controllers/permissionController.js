@@ -56,6 +56,8 @@ exports.createPermission = async (req, res) => {
 
 };
 
+
+
 exports.findPermission = async (user_id, door_id) => {
     const response = await sql.findPermission(user_id, door_id);
     return response;

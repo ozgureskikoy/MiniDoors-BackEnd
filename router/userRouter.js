@@ -18,8 +18,6 @@ userRouter.put('/status', middleWare.tokenControl, middleWare.typeCheckID, userC
 
 userRouter.put('/update', middleWare.typeCheckData, middleWare.tokenControl, userControl.editUser)
 
-userRouter.put('/forgot_pass', [], userControl.forgotPass)
 
-userRouter.put('/chance_pass', [], userControl.changePass)
 
 module.exports = userRouter;

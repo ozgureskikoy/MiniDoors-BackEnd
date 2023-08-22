@@ -5,6 +5,6 @@ const doorControls = require('../controllers/doorController');
 
 doorRouter.post('/create', middleWare.tokenControl, doorControls.addDoor)
 
-doorRouter.post('/open', middleWare.typeCheckMail, doorControls.openDoor)
+doorRouter.post('/open', middleWare.tokenControlDoor, doorControls.openDoor)
 
 module.exports = doorRouter;

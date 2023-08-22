@@ -1,21 +1,20 @@
 const pool = require('./dbConfig');
 
-exports.createSubadmin = async (name, surname, mail, pass, admin_id, comp_id, admin_role) => {
+exports.createCompadmin = async (name, surname, mail, pass, admin_id, comp_id) => {
 
     try {
         await pool.query(
-            `INSERT INTO subadmin(name, surname, password, mail, ${admin_role}, company_id) VALUES($1, $2, $3, $4, $5, $6)`,
+            `INSERT INTO compadmin(name, surname, password, mail, admin_id, comp_id) VALUES($1, $2, $3, $4, $5, $6)`,
             [name, surname, pass, mail, admin_id, comp_id]
         );
         let result = {
             code: 200,
             payload: {
-                msg: `subadmin created successfully.`
+                msg: `Compadmin created successfully.`
             }
         }
         return result;
     } catch (error) {
-        console.log("sub create error ==> ", error);
         let response = {
             "code": 5000,
             "payload": {
@@ -28,10 +27,10 @@ exports.createSubadmin = async (name, surname, mail, pass, admin_id, comp_id, ad
 
 }
 
-exports.deleteSubadmin = async (index) => {
+exports.deleteCompadmin = async (index) => {
     try {
         const queryResult = await pool.query(
-            `DELETE FROM subadmin WHERE mail = $1`,
+            `DELETE FROM compadmin WHERE mail = $1`,
             [index]
         );
 

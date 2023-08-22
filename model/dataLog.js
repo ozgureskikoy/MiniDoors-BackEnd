@@ -1,17 +1,17 @@
 const pool = require('./dbConfig.js');
 
-exports.createLog = async (user_id, door_id) => {
+exports.createLog = async (opener_id, door_id, opener_role) => {
   try {
     const currentDate = new Date();
     const timestamp = Math.floor(Date.parse(currentDate) / 1000);
-    
+
     await pool.query(
-      `INSERT INTO logs (time, user_id, door_id) VALUES ($1, $2, $3)`,
-      [timestamp, user_id, door_id]
+      `INSERT INTO logs (time, ${opener_role}, door_id) VALUES ($1, $2, $3)`,
+      [timestamp, opener_id, door_id]
     );
     let response = {
       code: 200,
-      payload:{
+      payload: {
         msg: `Log created successfully.`,
       }
     }
@@ -20,9 +20,9 @@ exports.createLog = async (user_id, door_id) => {
   } catch (error) {
     let response = {
       code: 4046,
-      payload:{
+      payload: {
         msg: "Log can not created",
-        err:error
+        err: error
       }
     }
     return response;
@@ -35,7 +35,7 @@ exports.getLogs = async (pageSize, page, sortColumn = 'time', sortOrder = 'desc'
     const queryResult = await pool.query(
       `SELECT * FROM logs ORDER BY ${sortColumn} ${sortOrder} LIMIT ${pageSize} OFFSET ${offset}`
     );
- 
+
     return {
       code: 200,
       msg: 'Logs fetched successfully.',
@@ -45,9 +45,9 @@ exports.getLogs = async (pageSize, page, sortColumn = 'time', sortOrder = 'desc'
     console.log(error);
     return {
       code: 5000,
-      payload:{
+      payload: {
         msg: 'Internal server errorr.',
-        err:error
+        err: error
       }
     };
   }

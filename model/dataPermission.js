@@ -1,4 +1,3 @@
-const { log } = require('console');
 const pool = require('./dbConfig.js');
 pool.connect(function (err) {
   if (err) {

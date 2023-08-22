@@ -1,7 +1,7 @@
 const express = require('express');
 adminRouter = express.Router();
 const middleWare = require('../middleWare/middleware');
-const adminControls = require('../controllers/adminController')
+const adminControls = require('../controllers/admin/adminController')
 
 adminRouter.post('/create', middleWare.typeCheckData, middleWare.tokenControl, adminControls.createAdmin)
 

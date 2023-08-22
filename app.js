@@ -11,6 +11,9 @@ const port = 3000;
 const userRouter = require('./router/userRouter');
 app.use('/user', userRouter);
 
+const guestRouter = require('./router/guestRouter');
+app.use('/guest', guestRouter);
+
 const adminRouter = require('./router/adminRouter');
 app.use('/admin', adminRouter);
 
@@ -23,17 +26,26 @@ app.use('/door', doorRouter);
 const permRouter = require('./router/permRouter');
 app.use('/perm', permRouter);
 
+const gpermRouter = require('./router/gpermRouter');
+app.use('/gperm', gpermRouter);
+
 const logRouter = require('./router/logRouter');
 app.use('/log', logRouter);
+
+const cadminRouter = require('./router/compadminRouter');
+app.use('/cadmin', cadminRouter);
 
 const sadminRouter = require('./router/subadminRouter');
 app.use('/sadmin', sadminRouter);
 
-const { checkLogin } = require('./controllers/userController');
-app.use('/login', checkLogin)
+const loginRouter = require('./router/loginRouter');
+app.use('/login', loginRouter);
 
-const { loginUser } = require('./controllers/userController');
-app.use('/login_control', loginUser)
+// const { checkLogin } = require('./controllers/userController');
+// app.use('/login', checkLogin)
+
+// const { loginUser } = require('./controllers/userController');
+// app.use('/login_control', loginUser)
 
 app.listen(port, () => {
     console.log(`${port}. port üzerinden server dinleniyor`);

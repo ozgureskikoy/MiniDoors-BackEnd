@@ -1,5 +1,5 @@
 const express = require('express');
-const subadminControl = require('../controllers/subadminControllers');
+const subadminControl = require('../controllers/admin/subadminController');
 
 sadminRouter = express.Router();
 const middleWare = require('../middleWare/middleware');
