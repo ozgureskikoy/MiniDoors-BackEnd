@@ -92,10 +92,6 @@ exports.readAllUser = async () => {
       }
     }
     return response;
-  } finally {
-    if (client) {
-      client.release();
-    }
   }
 };
 

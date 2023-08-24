@@ -9,17 +9,14 @@ exports.addDoor = async (req, res) => {
     const admin_id = admin.id
     const admin_rolee = admin.role
     const admin_role = admin_rolee + "_id"
-    console.log("admin= " + admin_id)
     let comp_id
     let comp_check
     if (admin_rolee == "admin") {
         const comp = await company.findCompanyByName(req.body.comp);
         comp_id = comp.payload.id
-        console.log('comp_id for admin ==> ', comp_id);
         comp_check = comp.code
     } else {
         comp_id = admin.comp
-        console.log('comp_id for compadmin ==> ', comp_id);
         comp_check = 200
     }
 
@@ -72,14 +69,9 @@ exports.findDoorByName = async (name) => {
 exports.openDoor = async (req, res) => {
     const reqtoken = await tokenS.tokenRead(req.headers['x-access-token']);
     const requester = reqtoken.role
-    console.log("requester ===> ", requester);
     const opener_role = requester + "_id"
-    console.log(" opener_role ==> ", opener_role, "<<<======");
     const response = await sql.openDoor(req.body.mail, req.body.door);
     if (response.code == 200) {
-        console.log("user r==> ", response.payload.msg);
-        console.log("user r==> ", response.payload.user_id);
-        console.log("door r==> ", response.payload.door_id);
         log.createLog(response.payload.user_id, response.payload.door_id, opener_role)
         return res.status(200).send(response)
     } else if (response.code == 4046) {

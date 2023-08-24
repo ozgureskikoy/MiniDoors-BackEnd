@@ -84,7 +84,7 @@ exports.openDoor = async (user_name, door_name) => {
 
   const doors = await door.findDoorByName(door_name);
   const users = await user.findUserByMail(user_name);
-  
+
   const sqlResponse = await perm.findPermission(users.id, doors.payload.id);
   if (sqlResponse.code == 200) {
 
@@ -140,7 +140,9 @@ exports.openDoor = async (user_name, door_name) => {
   }
 };
 
+exports.showDoors = () => {
 
+}
 
 
 

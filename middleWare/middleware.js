@@ -1,8 +1,6 @@
 const { check, body, query, validationResult } = require('express-validator');
-const { emitWarning } = require('process');
 var jwt = require('jsonwebtoken');
 const tokenS = require('../helpers/tokenControl');
-const { error } = require('console');
 
 exports.typeCheckID = [
     body("id", "id must be integer").isNumeric(),

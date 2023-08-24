@@ -10,6 +10,8 @@ exports.createGuest = async (req, res) => {
     const admin = await tokenS.tokenRead(req.headers['x-access-token']);
     const admin_id = admin.id
     console.log("admin_id ==> ", admin_id);
+    const admin_c = admin
+    console.log("admin_C ==> ", admin_c);
 
     const admin_rolee = admin.role
     const admin_role = admin_rolee + "_id"
@@ -34,22 +36,22 @@ exports.createGuest = async (req, res) => {
             var newPassword = response.payload.pass;
             const sendMail = response.payload.mail;
 
-            const fs = require('fs');
-            const htmlFilePath = './mail.html';
-            fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {
-                if (err) {
-                    console.error('Error reading HTML file:', err);
-                    return;
-                }
-                htmlContent = htmlContent.replace('{newPassword}', newPassword);
-                mail.sendEmailUsingNodemailer(sendMail, "Yeni Şifre", htmlContent, function (error, response) {
-                    if (error) {
-                        console.log('Error:', error);
-                    } else {
-                        console.log('Response:', response);
-                    }
-                });
-            });
+            // const fs = require('fs');
+            // const htmlFilePath = './mail.html';
+            // fs.readFile(htmlFilePath, 'utf8', (err, htmlContent) => {
+            //     if (err) {
+            //         console.error('Error reading HTML file:', err);
+            //         return;
+            //     }
+            //     htmlContent = htmlContent.replace('{newPassword}', newPassword);
+            //     mail.sendEmailUsingNodemailer(sendMail, "Yeni Şifre", htmlContent, function (error, response) {
+            //         if (error) {
+            //             console.log('Error:', error);
+            //         } else {
+            //             console.log('Response:', response);
+            //         }
+            //     });
+            // });
             let result = {
                 code: response.code,
                 payload: {
@@ -103,12 +105,34 @@ exports.findGuestByMail = async (mail) => {
 
     const response = await sql.readByMailGuest(mail);
     if (response) {
+
+        return response;
+    } else {
+
+        return;
+    }
+
+};
+
+exports.showGuests = async (req, res) => {
+
+    const response = await sql.showGuests(req.body.index, req.body.search_param)
+    
+    if (response) {
   
-      return response;
+      let result = {
+        "code": 200,
+        "meta": "ok",
+        "payload": response
+      }
+      return res.status(200).send(result)
     } else {
   
-      return;
+      let result = {
+        "code": 4044,
+        "meta": "Guests not found"
+      }
+      return res.status(404).send(result)
     }
   
-  };
-  
+  }

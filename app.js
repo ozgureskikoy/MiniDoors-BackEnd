@@ -6,7 +6,7 @@ const Parser = require('body-parser');
 app.use(Parser.urlencoded({ extended: true }));
 app.use(Parser.json());
 
-const port = 3000;  
+const port = 3000;
 
 const userRouter = require('./router/userRouter');
 app.use('/user', userRouter);
@@ -41,11 +41,12 @@ app.use('/sadmin', sadminRouter);
 const loginRouter = require('./router/loginRouter');
 app.use('/login', loginRouter);
 
-// const { checkLogin } = require('./controllers/userController');
-// app.use('/login', checkLogin)
 
-// const { loginUser } = require('./controllers/userController');
-// app.use('/login_control', loginUser)
+const checkTime = require('./helpers/guestExp')
+checkTime()
+const interval = 10 * 60 * 1000;
+setInterval(checkTime, interval);
+
 
 app.listen(port, () => {
     console.log(`${port}. port üzerinden server dinleniyor`);

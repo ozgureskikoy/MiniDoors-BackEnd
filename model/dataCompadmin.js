@@ -63,3 +63,58 @@ exports.deleteCompadmin = async (index) => {
 
     }
 };
+
+exports.showCompadmin = async (index, search_param) => {
+
+    try {
+
+        const list = []
+        const queryResult = await pool.query(
+            `SELECT id as id,
+                 name as name,
+                 surname as surname,
+                 password as password,
+                 mail as mail,
+                 status as status,
+                 admin_id as admin_id,
+                 company_id as company_id
+                 FROM compadmin
+                 WHERE ${search_param} = $1`,
+            [index]
+        );
+
+        queryResult.rows.forEach((row) => {
+            list.push({
+                id: row.id,
+                name: row.name,
+                surname: row.surname,
+                pass: row.password,
+                mail: row.mail,
+                status: row.status,
+                admin_id: row.admin_id,
+                comp_id: row.company_id_id
+            });
+        });
+
+        let response = {
+            code: 200,
+            payload: {
+                msg: "Compadmins fetched sucsessfully",
+                list: list
+            }
+        }
+
+        return response;
+    } catch (error) {
+        let response = {
+            code: 5000,
+            payload: {
+                msg: 'Server error',
+                err: error
+            }
+        }
+        console.log("============>>>>> ",error);
+        return response;
+    }
+
+}

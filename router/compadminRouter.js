@@ -8,4 +8,6 @@ cadminRouter.post('/create', middleWare.tokenControl, compadminControl.createCom
 
 cadminRouter.delete('/delete', middleWare.typeCheckMail, compadminControl.deleteCompadmin)
 
+cadminRouter.post('/show', middleWare.tokenControl, compadminControl.showCompadmin)
+
 module.exports = cadminRouter;

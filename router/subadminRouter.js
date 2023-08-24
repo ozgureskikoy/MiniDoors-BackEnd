@@ -6,6 +6,8 @@ const middleWare = require('../middleWare/middleware');
 
 sadminRouter.post('/create', middleWare.tokenControl, subadminControl.createSubadmin)
 
+sadminRouter.post('/show', middleWare.tokenControl, subadminControl.showSubadmin)
+
 sadminRouter.delete('/delete', middleWare.typeCheckMail, subadminControl.deleteSubadmin)
 
 module.exports = sadminRouter;

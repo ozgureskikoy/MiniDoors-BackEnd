@@ -73,6 +73,7 @@ async function loginA(mail, userType, password) {
             "name": row.name,
             "mail": row.mail,
             "status": row.status,
+            "comp":row.company_id,
             "role": userType[0]
           }
         };
