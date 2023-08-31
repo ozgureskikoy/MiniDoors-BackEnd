@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt");
 const tokenS = require('../helpers/tokenControl');
 const cryption = require('../helpers/cryption')
 const redis = require('../config/redisConfig');
+const socket = require('../helpers/socket/socket')
+const setupSocket = require('../helpers/socket/client');
 
 exports.checkLogin = async (req, res) => {
   try {
@@ -57,18 +59,23 @@ exports.checkLogin = async (req, res) => {
 exports.loginUser = async (req, res) => {
 
   try {
-
     const key = req.query.key;
     console.log("key ==> ", key);
     const userdataString = await redis.redisGet(key);
     const userdata = JSON.parse(userdataString);
 
-    console.log("data string => ", userdata);
     console.log("data admin role => ", userdata.role);
 
     if (await cryption.comparePassword(req.body.password, userdata.hash)) {
 
       if (userdata.status == 1) {
+        if (userdata.comp != null) {
+          socket.start()
+          const client = setupSocket(userdata.comp);
+          client.on('message', (message) => {
+            console.log(`Received messagee: ${message}`);
+          });
+        }
 
         let token = tokenS.tokenCreate(userdata, '7d');
         res.status(200).json({
@@ -77,6 +84,7 @@ exports.loginUser = async (req, res) => {
             message: userdata,
             jwtoken: token
           }
+
         });
         redis.redisDel(key);
       } else {

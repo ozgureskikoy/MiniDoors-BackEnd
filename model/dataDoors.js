@@ -35,12 +35,67 @@ exports.addDoor = async (name, admin_id, comp_id, admin_role) => {
   }
 };
 
+exports.showDoors = async (index) => {
+  let client;
+  try {
+  
+    client = await pool.connect();
+    const list = [];
+    const queryResult = await client.query(`
+            SELECT id as id,
+                name as name,
+                admin_id as admin_id,
+                compadmin_id as compadmin_id,
+                company_id as company_id,
+                status as status
+            FROM doors
+            WHERE company_id = $1`,
+      [index]
+    );
+
+    queryResult.rows.forEach((row) => {
+      list.push({
+        id: row.id,
+        name: row.name,
+        admin_id: row.admin_id,
+        compadmin_id: row.compadmin_id,
+        comp_id: row.company_id_id,
+        status: row.status
+      });
+    });
+
+    let response = {
+      code: 200,
+      payload: {
+        msg: "Doors fetched sucsessfully",
+        list: list
+      }
+    }
+
+    return response;
+  } catch (error) {
+    let response = {
+      code: 5000,
+      payload: {
+        msg: 'Server error',
+        err: error
+      }
+    }
+    return response;
+  }finally {
+    if (client) {
+      client.release();
+    }
+  }
+};
+
 
 exports.readByNameDoors = async (index) => {
 
   try {
     const queryResult = await pool.query(
-      `SELECT     id as id,
+      `SELECT    
+                 id as id,
                   name as name,
                   company_id as comp_id  
            FROM doors
@@ -81,11 +136,21 @@ exports.readByNameDoors = async (index) => {
 
 
 exports.openDoor = async (user_name, door_name) => {
-
+  let stuation
   const doors = await door.findDoorByName(door_name);
   const users = await user.findUserByMail(user_name);
-
+  const status = await this.getStatus(doors.payload.id)
+  console.log("doors.payload.id ==> ",doors.payload.id);
+  console.log("status ==> ",status.status);
   const sqlResponse = await perm.findPermission(users.id, doors.payload.id);
+  if (status.status == 0) {
+    stuation = "Door Opened"
+    this.setStatus("1",doors.payload.id)
+  } else {
+    stuation = "Door Closed"
+    this.setStatus("0",doors.payload.id)
+
+  }
   if (sqlResponse.code == 200) {
 
     const fetchedDay = sqlResponse.allowed_days;
@@ -108,7 +173,7 @@ exports.openDoor = async (user_name, door_name) => {
       let response = {
         code: 200,
         payload: {
-          msg: "Door open",
+          msg: stuation,
           user: users.name,
           door: doors.payload.name,
           user_id: users.id,
@@ -140,10 +205,68 @@ exports.openDoor = async (user_name, door_name) => {
   }
 };
 
-exports.showDoors = () => {
+exports.getStatus = async (door_id) => {
+  try {
+    const queryResult = await pool.query(
+      `SELECT    
+           status as status
+       FROM doors
+       WHERE id = $1`,
+      [door_id]
+    );
 
+    const row = queryResult.rows[0];
+    if (row) {
+
+      return {
+        code: 200,
+        status: row.status
+      };
+
+    } else {
+      return {
+        code: 4044,
+      };
+    }
+  } catch (error) {
+    return {
+      code: 5000,
+      msg: error
+    };
+  }
 }
 
+
+exports.setStatus = async (index, door_id) => {
+  try {
+    const queryResult = await pool.query(
+      `UPDATE doors
+         SET status = $1
+         WHERE id = $2`,
+      [index, door_id]
+    );
+
+    if (queryResult.rowCount > 0) {
+      let response = {
+        code: 200,
+        payload: {
+          msg: "Status updated successfully."
+        }
+      }
+      return response;
+    } else {
+      let response = {
+        code: 4044,
+        payload: {
+          msg: "User with the specified index not found."
+        }
+      }
+      return response;
+    }
+  } catch (error) {
+    return error;
+  }
+}
 
 
 

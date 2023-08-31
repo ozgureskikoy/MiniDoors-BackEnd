@@ -7,4 +7,7 @@ doorRouter.post('/create', middleWare.tokenControl, doorControls.addDoor)
 
 doorRouter.post('/open', middleWare.tokenControlDoor, doorControls.openDoor)
 
+doorRouter.get('/', [], doorControls.showDoors)
+
+
 module.exports = doorRouter;

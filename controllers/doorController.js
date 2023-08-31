@@ -3,6 +3,8 @@ global.config = require('../helpers/tokenConfig');
 const tokenS = require('../helpers/tokenControl');
 const company = require('./companyController');
 const log = require('../model/dataLog');
+const setupSocket = require('../helpers/socket/client');
+
 
 exports.addDoor = async (req, res) => {
     const admin = await tokenS.tokenRead(req.headers['x-access-token']);
@@ -51,6 +53,20 @@ exports.addDoor = async (req, res) => {
 
 
 };
+exports.showDoors = async (req, res) => {
+
+    const response = await sql.showDoors(req.body.comp_id);
+    if (response.code == 200) {
+
+        return res.status(200).send(response)
+
+    } else {
+
+        return res.status(404).send(response)
+
+    }
+
+};
 
 exports.findDoorByName = async (name) => {
 
@@ -65,13 +81,20 @@ exports.findDoorByName = async (name) => {
 
 };
 
-
 exports.openDoor = async (req, res) => {
     const reqtoken = await tokenS.tokenRead(req.headers['x-access-token']);
+    console.log("==> ", reqtoken);
     const requester = reqtoken.role
+    const compID = reqtoken.comp
+    console.log("compID ==> ", compID);
     const opener_role = requester + "_id"
+
+
     const response = await sql.openDoor(req.body.mail, req.body.door);
     if (response.code == 200) {
+        const socket = setupSocket(compID);
+        const message = JSON.stringify([compID, ` ${req.body.door} ${response.payload.msg} by ${reqtoken.mail}`]);
+        socket.emit('message', message);
         log.createLog(response.payload.user_id, response.payload.door_id, opener_role)
         return res.status(200).send(response)
     } else if (response.code == 4046) {
@@ -82,4 +105,4 @@ exports.openDoor = async (req, res) => {
         return res.status(404).send(response)
     }
 
-}; 
+};

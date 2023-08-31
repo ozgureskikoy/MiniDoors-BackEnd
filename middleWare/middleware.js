@@ -86,7 +86,7 @@ exports.tokenControlDoor = [
     async (req, res, next) => {
         var token = req.headers['x-access-token'];
         const decodedToken = await tokenS.compareRole(token);
-        if (decodedToken.role == "user" || decodedToken.role == "guests") {
+        if (decodedToken.role == "users" || decodedToken.role == "guests") {
             const expirationDate = new Date(decodedToken.exp * 1000);
             console.log('JWT expires at:', expirationDate);
 

@@ -16,7 +16,7 @@ pool.connect(function (err) {
 
 async function findUserTypeByEmail(email) {
   const query = `
-      SELECT 'user' AS user_type
+      SELECT 'users' AS user_type
       FROM users
       WHERE mail = $1
       UNION
@@ -40,6 +40,7 @@ async function findUserTypeByEmail(email) {
   try {
     const result = await pool.query(query, [email]);
     const resTable = result.rows.map(row => row.user_type);
+    console.log("restable ===>" ,resTable);
     return resTable;
   } catch (error) {
     let response = {
@@ -63,7 +64,10 @@ async function loginA(mail, userType, password) {
     const row = queryResult.rows[0];
     if (row) {
       const passwordMatch = await cryption.comparePassword(password, row.password);
-
+      
+      console.log("============> ",password);
+      console.log("============>> ",row.password);
+      console.log("============>>>",passwordMatch);
       if (passwordMatch) {
 
         return {
@@ -106,142 +110,7 @@ exports.logControlUser = async (mail, password) => {
   console.log("mail in ==>> ", userType[0]);
   console.log("===============>> ", await loginA(mail, userType));
   return await loginA(mail, userType, password)
-  // if (userType == "user") {
-
-  //   try {
-  //     const queryResult = await pool.query(
-  //       `SELECT *
-  //            FROM users
-  //            WHERE mail = $1`,
-  //       [mail]
-  //     );
-
-  //     const row = queryResult.rows[0];
-  //     if (row) {
-  //       const passwordMatch = await cryption.comparePassword(password, row.password);
-
-  //       if (passwordMatch) {
-
-  //         return {
-  //           "code": 200,
-  //           payload: {
-  //             "id": row.id,
-  //             "name": row.name,
-  //             "mail": row.mail,
-  //             "status": row.status,
-  //             "role": userType[0]
-  //           }
-  //         };
-  //       } else {
-  //         return {
-  //           code: 4044,
-  //           payload: {
-  //             msg: "Şifre hatalı",
-  //           }
-  //         };
-  //       }
-  //     } else {
-  //       return { code: 404 };
-  //     }
-  //   } catch (error) {
-  //     let response = {
-  //       code: 500,
-  //       payload: {
-  //         err: error
-  //       }
-  //     }
-  //     return response;
-  //   }
-  // } else if (userType == "admin") {
-
-  //   try {
-  //     const queryResult = await pool.query(
-  //       `SELECT *
-  //            FROM admin
-  //            WHERE mail = $1`,
-  //       [mail]
-  //     );
-
-
-  //     const row = queryResult.rows[0];
-  //     if (row) {
-
-  //       const passwordMatch = await cryption.comparePassword(password, row.password);
-  //       console.log("cont 3 ===>> ");
-  //       console.log("cont 3 ===>> ", passwordMatch);
-  //       if (passwordMatch) {
-  //         return {
-  //           "code": 200,
-  //           payload: {
-  //             "id": row.id,
-  //             "name": row.name,
-  //             "mail": row.mail,
-  //             "status": row.status,
-  //             "role": userType[0]
-  //           }
-  //         };
-  //       } else {
-  //         return {
-  //           code: 4044,
-  //           payload: {
-  //             msg: "Şifre hatalı"
-  //           }
-  //         };
-  //       }
-  //     } else {
-  //       return { code: 404 };
-  //     }
-  //   } catch (error) {
-  //     return error;
-  //   }
-  // } else if (userType == "compadmin") {
-  //   try {
-  //     const queryResult = await pool.query(
-  //       `SELECT *
-  //            FROM compadmin
-  //            WHERE mail = $1`,
-  //       [mail]
-  //     );
-
-
-  //     const row = queryResult.rows[0];
-  //     if (row) {
-
-  //       const passwordMatch = await cryption.comparePassword(password, row.password);
-
-  //       if (passwordMatch) {
-  //         return {
-  //           "code": 200,
-  //           payload: {
-  //             "id": row.id,
-  //             "name": row.name,
-  //             "mail": row.mail,
-  //             "status": row.status,
-  //             comp: row.comp_id,
-  //             "role": userType[0]
-  //           }
-  //         };
-  //       } else {
-  //         return {
-  //           code: 4044,
-  //           payload: {
-  //             msg: "Şifre hatalı"
-  //           }
-  //         };
-  //       }
-  //     } else {
-  //       return { code: 404 };
-  //     }
-  //   } catch (error) {
-  //     return error;
-  //   }
-  // }
-
-
-  // else {
-  //   return { code: 404 };
-  // }
-
+  
 };
 
 
