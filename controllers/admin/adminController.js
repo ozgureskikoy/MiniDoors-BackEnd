@@ -58,7 +58,7 @@ exports.deleteAdmin = async (req, res) => {
 
 };
 exports.editAdmin = async (req, res) => {
-  const response = await sql.updateAdmin(req.body.id, req.body.name);
+  const response = await sql.updateAdmin(req.body.mail, req.body.name);
 
 
   if (response.code == 200) {
@@ -72,7 +72,7 @@ exports.editAdmin = async (req, res) => {
 };
 
 exports.statusUpdateAdmin = async (req, res) => {
-  const response = await sql.statusUpdateAdmin(req.body.id, req.body.status);
+  const response = await sql.statusUpdateAdmin(req.body.mail, req.body.status);
 
   if (response.code == 200) {
 

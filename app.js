@@ -47,6 +47,8 @@ checkTime()
 const interval = 10 * 60 * 1000;
 setInterval(checkTime, interval);
 
+const socket=require('./helpers/socket/socket')
+socket.start()
 
 app.listen(port, () => {
     console.log(`${port}. port üzerinden server dinleniyor`);

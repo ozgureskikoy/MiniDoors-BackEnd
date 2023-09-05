@@ -12,5 +12,6 @@ loginRouter.post('/', [], loginControl.checkLogin)
 
 loginRouter.post('/control', [], loginControl.loginUser)
 
+loginRouter.post('/logout',[],loginControl.logOut)
 
 module.exports = loginRouter;

@@ -6,7 +6,7 @@ const middleWare = require('../middleWare/middleware');
 
 cadminRouter.post('/create', middleWare.tokenControl, compadminControl.createCompadmin)
 
-cadminRouter.delete('/delete', middleWare.typeCheckMail, compadminControl.deleteCompadmin)
+cadminRouter.delete('/delete', middleWare.typeCheckMail,middleWare.tokenControl, compadminControl.deleteCompadmin)
 
 cadminRouter.post('/show', middleWare.tokenControl, compadminControl.showCompadmin)
 

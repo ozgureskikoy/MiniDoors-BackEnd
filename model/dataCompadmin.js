@@ -4,7 +4,7 @@ exports.createCompadmin = async (name, surname, mail, pass, admin_id, comp_id) =
 
     try {
         await pool.query(
-            `INSERT INTO compadmin(name, surname, password, mail, admin_id, comp_id) VALUES($1, $2, $3, $4, $5, $6)`,
+            `INSERT INTO compadmin(name, surname, password, mail, admin_id, company_id) VALUES($1, $2, $3, $4, $5, $6)`,
             [name, surname, pass, mail, admin_id, comp_id]
         );
         let result = {
@@ -15,10 +15,11 @@ exports.createCompadmin = async (name, surname, mail, pass, admin_id, comp_id) =
         }
         return result;
     } catch (error) {
+        console.log("error => ",error);
         let response = {
             "code": 5000,
             "payload": {
-                msg: error.detail
+                msg: error
             }
         }
         return response

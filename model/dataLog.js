@@ -4,7 +4,10 @@ exports.createLog = async (opener_id, door_id, opener_role) => {
   try {
     const currentDate = new Date();
     const timestamp = Math.floor(Date.parse(currentDate) / 1000);
-
+    console.log("HERE");
+    console.log("opener => ",opener_id);
+    console.log("opener role => ",opener_role);
+    console.log("door => ",door_id);
     await pool.query(
       `INSERT INTO logs (time, ${opener_role}, door_id) VALUES ($1, $2, $3)`,
       [timestamp, opener_id, door_id]

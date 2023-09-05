@@ -53,7 +53,6 @@ exports.readAllUser = async () => {
         SELECT id as id,
                name as name,
                surname as surname,
-               password as password,
                mail as mail,
                status as status,
                admin_id as admin_id,

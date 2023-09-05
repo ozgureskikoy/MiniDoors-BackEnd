@@ -1,6 +1,6 @@
-module.exports = { 
+module.exports = {
     secretKey: "random",
-    algorithm: 'HS256', 
-    };
+    algorithm: 'HS256',
+};
 
 

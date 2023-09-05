@@ -4,8 +4,7 @@ const bcrypt = require("bcrypt");
 const tokenS = require('../helpers/tokenControl');
 const cryption = require('../helpers/cryption')
 const redis = require('../config/redisConfig');
-const socket = require('../helpers/socket/socket')
-const setupSocket = require('../helpers/socket/client');
+const setupClient = require('../helpers/socket/client');
 
 exports.checkLogin = async (req, res) => {
   try {
@@ -55,7 +54,7 @@ exports.checkLogin = async (req, res) => {
 
 }
 
-
+let client 
 exports.loginUser = async (req, res) => {
 
   try {
@@ -69,15 +68,15 @@ exports.loginUser = async (req, res) => {
     if (await cryption.comparePassword(req.body.password, userdata.hash)) {
 
       if (userdata.status == 1) {
-        if (userdata.comp != null) {
-          socket.start()
-          const client = setupSocket(userdata.comp);
-          client.on('message', (message) => {
-            console.log(`Received messagee: ${message}`);
-          });
-        }
 
         let token = tokenS.tokenCreate(userdata, '7d');
+
+        if (userdata.comp != null) {
+           client = setupClient(userdata.comp, userdata.id, token);
+          client.on('message', (message) => {
+            console.log(`Received message: ${message}`);
+          });
+        }
         res.status(200).json({
           code: 200,
           payload: {
@@ -170,4 +169,9 @@ exports.changePass = async (req, res) => {
   } else {
     return res.status(404).send(response)
   }
+}
+
+
+exports.logOut = async () => {
+  client.disconnect();
 }

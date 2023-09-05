@@ -4,6 +4,7 @@ const tokenS = require('../helpers/tokenControl');
 const company = require('./companyController');
 const log = require('../model/dataLog');
 const setupSocket = require('../helpers/socket/client');
+const { Socket } = require('socket.io-client');
 
 
 exports.addDoor = async (req, res) => {
@@ -88,13 +89,17 @@ exports.openDoor = async (req, res) => {
     const compID = reqtoken.comp
     console.log("compID ==> ", compID);
     const opener_role = requester + "_id"
-
-
+    const userID = reqtoken.id
+    console.log("reqtoken_id => ", reqtoken.id);
     const response = await sql.openDoor(req.body.mail, req.body.door);
     if (response.code == 200) {
-        const socket = setupSocket(compID);
+
+        const socket = setupSocket(compID, userID, req.headers['x-access-token']);
         const message = JSON.stringify([compID, ` ${req.body.door} ${response.payload.msg} by ${reqtoken.mail}`]);
         socket.emit('message', message);
+        //socket.disconnectSocket();
+
+
         log.createLog(response.payload.user_id, response.payload.door_id, opener_role)
         return res.status(200).send(response)
     } else if (response.code == 4046) {
@@ -103,6 +108,6 @@ exports.openDoor = async (req, res) => {
     } else {
 
         return res.status(404).send(response)
-    }
+    } 
 
 };

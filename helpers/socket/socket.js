@@ -1,41 +1,52 @@
 const http = require('http');
 const server = http.createServer();
 const io = require('socket.io')(server);
+const jwt = require('jsonwebtoken');
+global.config = require('../tokenConfig');
+
 
 const port = process.env.PORT || 5000;
-
-//const connectedSockets = {};
+const loggedInUsers = [];
 
 exports.start = () => {
+
+
   io.on('connection', (socket) => {
     const compID = parseInt(socket.handshake.query.compID, 10);
-    //connectedSockets[compID] = socket;
-    socket.join(compID);
-    //console.log(`connected: ${userID} in ${Object.keys(connectedSockets)}`);
-    console.log(`connected: ${compID}`);
+    const userID = socket.handshake.query.userID;
+    const token = socket.handshake.query.token
+    jwt.verify(token, global.config.secretKey, (err, decoded) => {
+      if (err) {
+        console.log("control==> " + err);
 
-    socket.on('message', (message) => {
-      console.log(`received from ${compID}: ${message}`);
-      const messageArray = JSON.parse(message);
-      console.log(message);
-      const toUserID = messageArray[0];
+        socket.disconnect();
 
-      io.to(toUserID).emit('message', JSON.stringify(messageArray));
+      } else {
+        console.log("token correct");
+
+
+        loggedInUsers.push(userID)
+        if (loggedInUsers.includes(userID)) {
+          socket.join(compID);
+          console.log(`User ${userID} connected in company  ${compID}`)
+        }
+
+
+        socket.on('message', (message) => {
+          console.log(`received from ${compID}: ${message}`);
+          const messageArray = JSON.parse(message);
+          console.log(message);
+          const toUserID = messageArray[0];
+
+          io.to(toUserID).emit('message', JSON.stringify(messageArray));
+        });
+
+      }
     });
 
-    //   const toUserSocket = connectedSockets[toUserID];
-
-    //   if (toUserSocket) {
-    //     console.log(`sent to ${toUserID}: ${JSON.stringify(messageArray)}`);
-    //     messageArray[0] = userID;
-    //     toUserSocket.emit('message', JSON.stringify(messageArray));
-    //   }
-    // });
-
     socket.on('disconnect', () => {
-      //delete connectedSockets[userID];
       socket.leave(compID);
-      console.log(`disconnected: ${compID}`);
+      console.log(`disconnected: ${userID}`);
     });
   });
 

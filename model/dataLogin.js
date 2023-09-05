@@ -219,3 +219,7 @@ exports.forgotPass = async (mail) => {
   }
 
 }
+
+exports.logOut = async () => {
+
+}

@@ -1,18 +1,32 @@
 const io = require('socket.io-client');
+const jwt = require('jsonwebtoken');
 
-function setupSocket(compID) {
+
+
+function setupSocket(compID, userID, token) {
+  const socketKey = `${compID}-${userID}`
+
+ 
   const socket = io.connect(`http://localhost:5000`, {
-    query: { compID },
+    query: {
+      compID: compID,
+      userID: userID,
+      token: token
+    },
   });
 
   socket.on('connect', () => {
-    console.log('Connected to server');
+    console.log('Connected to server', compID, "=>", userID);
   });
 
- 
+  socket.disconnectSocket = () => {
+    socket.disconnect();
+    console.log('Disconnected from server', compID, '=>', userID);
+  };
 
-  // Return the socket instance
+  
   return socket;
 }
 
-module.exports=setupSocket;
+module.exports = setupSocket
+

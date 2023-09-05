@@ -205,7 +205,7 @@ exports.updateAdmin = async (index, newData) => {
     const queryResult = await pool.query(
       `UPDATE admin
          SET name = $1
-         WHERE id = $2`,
+         WHERE mail = $2`,
       [newData, index]
     );
 
@@ -221,7 +221,7 @@ exports.updateAdmin = async (index, newData) => {
       let result = {
         code: 4044,
         payload: {
-          msg: "Admin with the specified index not found."
+          msg: "Admin with the specified mail not found."
         }
       }
       return result;
@@ -246,7 +246,7 @@ exports.statusUpdateAdmin = async (index, newData) => {
     const queryResult = await pool.query(
       `UPDATE admin
          SET status = $1
-         WHERE id = $2`,
+         WHERE mail = $2`,
       [newData, index]
     );
 
