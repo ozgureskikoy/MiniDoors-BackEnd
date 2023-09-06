@@ -4,7 +4,7 @@ const userControl = require('../controllers/userController');
 userRouter = express.Router();
 const middleWare = require('../middleWare/middleware');
 
-userRouter.post('/create', middleWare.tokenControl, userControl.createUser)
+userRouter.post('/create', middleWare.tokenControl, middleWare.createControl, userControl.createUser)
 
 userRouter.get('/all', middleWare.tokenControl, userControl.allUser)
 

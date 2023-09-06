@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 function setupSocket(compID, userID, token) {
   const socketKey = `${compID}-${userID}`
 
- 
+
   const socket = io.connect(`http://localhost:5000`, {
     query: {
       compID: compID,
@@ -24,7 +24,8 @@ function setupSocket(compID, userID, token) {
     console.log('Disconnected from server', compID, '=>', userID);
   };
 
-  
+
+
   return socket;
 }
 

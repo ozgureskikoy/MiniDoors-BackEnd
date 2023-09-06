@@ -14,7 +14,7 @@ pool.connect(function (err) {
 })
 
 
-async function findUserTypeByEmail(email) {
+exports.findUserTypeByEmail = async (email) => {
   const query = `
       SELECT 'users' AS user_type
       FROM users
@@ -40,7 +40,7 @@ async function findUserTypeByEmail(email) {
   try {
     const result = await pool.query(query, [email]);
     const resTable = result.rows.map(row => row.user_type);
-    console.log("restable ===>" ,resTable);
+    console.log("restable ===>", resTable);
     return resTable;
   } catch (error) {
     let response = {
@@ -64,10 +64,10 @@ async function loginA(mail, userType, password) {
     const row = queryResult.rows[0];
     if (row) {
       const passwordMatch = await cryption.comparePassword(password, row.password);
-      
-      console.log("============> ",password);
-      console.log("============>> ",row.password);
-      console.log("============>>>",passwordMatch);
+
+      console.log("============> ", password);
+      console.log("============>> ", row.password);
+      console.log("============>>>", passwordMatch);
       if (passwordMatch) {
 
         return {
@@ -77,7 +77,7 @@ async function loginA(mail, userType, password) {
             "name": row.name,
             "mail": row.mail,
             "status": row.status,
-            "comp":row.company_id,
+            "comp": row.company_id,
             "role": userType[0]
           }
         };
@@ -106,11 +106,11 @@ async function loginA(mail, userType, password) {
 exports.logControlUser = async (mail, password) => {
 
   console.log("in find type");
-  const userType = await findUserTypeByEmail(mail);
+  const userType = await this.findUserTypeByEmail(mail);
   console.log("mail in ==>> ", userType[0]);
   console.log("===============>> ", await loginA(mail, userType));
   return await loginA(mail, userType, password)
-  
+
 };
 
 

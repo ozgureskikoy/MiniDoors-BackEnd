@@ -54,7 +54,7 @@ exports.checkLogin = async (req, res) => {
 
 }
 
-let client 
+let client
 exports.loginUser = async (req, res) => {
 
   try {
@@ -72,7 +72,7 @@ exports.loginUser = async (req, res) => {
         let token = tokenS.tokenCreate(userdata, '7d');
 
         if (userdata.comp != null) {
-           client = setupClient(userdata.comp, userdata.id, token);
+          client = setupClient(userdata.comp, userdata.id, token);
           client.on('message', (message) => {
             console.log(`Received message: ${message}`);
           });
@@ -171,7 +171,15 @@ exports.changePass = async (req, res) => {
   }
 }
 
+const socket = require('../helpers/socket/socket')
 
-exports.logOut = async () => {
-  client.disconnect();
+exports.logOut = async (req, res) => {
+  const user = await tokenS.tokenRead(req.headers['x-access-token']);
+  console.log("logout==> ",user.id);
+  socket.delSocket(user.id)
+  console.log("A");
+  return res.status(200).json({
+    code:200,
+    msg:"Disconnected Succesfuly"
+  })
 }

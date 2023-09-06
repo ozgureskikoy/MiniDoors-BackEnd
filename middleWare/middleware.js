@@ -56,7 +56,7 @@ exports.tokenControl = [
     async (req, res, next) => {
         var token = req.headers['x-access-token'];
         const decodedToken = await tokenS.compareRole(token);
-        if (decodedToken.role == "admin" ||decodedToken.role == "compadmin") {
+        if (decodedToken.role == "admin" || decodedToken.role == "compadmin") {
             console.log(" In middleware role", decodedToken.role);
             const expirationDate = new Date(decodedToken.exp * 1000);
             console.log('JWT expires at:', expirationDate);
@@ -129,6 +129,23 @@ exports.typeStatus = [
         next();
     }
 ]
+const A = require('../model/dataLogin')
 
+exports.createControl = [
+    async(req, res, next)=>{
 
+      const B = await  A.findUserTypeByEmail(req.body.mail)
+      console.log('middWb => ',B[0]);
+      if (!B[0]) {
+        next()
+      }
+    else{
+        return res.status(401).json({
+            code:4001,
+            msg:"This mail allready used"
+        })
+    }
+    }
+
+]
 
