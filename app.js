@@ -8,6 +8,12 @@ app.use(Parser.json());
 
 const port = 3000;
 
+app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    next();
+})
 const userRouter = require('./router/userRouter');
 app.use('/user', userRouter);
 
@@ -47,7 +53,7 @@ checkTime()
 const interval = 10 * 60 * 1000;
 setInterval(checkTime, interval);
 
-const socket=require('./helpers/socket/socket')
+const socket = require('./helpers/socket/socket')
 socket.start()
 
 app.listen(port, () => {
