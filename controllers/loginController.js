@@ -11,10 +11,12 @@ exports.checkLogin = async (req, res) => {
     const response = await sql.logControlUser(req.body.mail, req.body.password);
 
     if (response.code == 200) {
-      pass = cryption.generateRandomPassword(10);
+      pass = cryption.generateRandomPassword(6);
       const hash = await bcrypt.hash(pass, 10);
 
       let userdata = {
+        name:response.payload.name,
+        surname:response.payload.surname,
         mail: req.body.mail,
         role: response.payload.role,
         id: response.payload.id,
@@ -31,13 +33,14 @@ exports.checkLogin = async (req, res) => {
 
       redis.redisSet(key, userdataString, 300);
 
-      const urlWithParams = new URL("http://localhost:3000/login/control");
+      // const urlWithParams = new URL("http://localhost:3000/login/control");
 
-      urlWithParams.searchParams.append("key", key);
+      // urlWithParams.searchParams.append("key", key);
 
       let result = {
         password: pass,
-        link: urlWithParams
+        //link: urlWithParams
+        key:key
       }
 
       return res.status(200).send(result);

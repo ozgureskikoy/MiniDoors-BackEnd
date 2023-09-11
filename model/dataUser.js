@@ -152,6 +152,7 @@ exports.readByNameUser = async (index) => {
         "code": 200,
         "id": row.id,
         "name": row.name,
+        "surname":row.surname,
         "pass": row.password,
         "mail": row.mail,
         "status": row.status,

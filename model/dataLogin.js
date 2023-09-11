@@ -75,6 +75,7 @@ async function loginA(mail, userType, password) {
           payload: {
             "id": row.id,
             "name": row.name,
+            "surname":row.surname,
             "mail": row.mail,
             "status": row.status,
             "comp": row.company_id,
