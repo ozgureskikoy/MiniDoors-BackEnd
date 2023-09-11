@@ -10,7 +10,7 @@ userRouter.get('/all', middleWare.tokenControl, userControl.allUser)
 
 userRouter.get('/find', middleWare.tokenControl, userControl.findUser)
 
-userRouter.get('/find_byname', middleWare.tokenControl, userControl.findUserByName)
+userRouter.get('/find_byname', [], userControl.findUserByName)
 
 userRouter.delete('/delete', middleWare.typeCheckMail, userControl.deleteUser)
 
