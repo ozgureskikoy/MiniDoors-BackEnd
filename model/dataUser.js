@@ -141,7 +141,7 @@ exports.readByNameUser = async (index) => {
                 admin_id as admin_id,
                 company_id as company_id
          FROM users
-         WHERE name = $1`,
+         WHERE mail = $1`,
       [index]
     );
 

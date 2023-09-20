@@ -39,7 +39,7 @@ exports.findUser = async (req, res) => {
 };
 exports.findUserByName = async (req, res) => {
 
-  const response = await sql.readByNameUser(req.body.username);
+  const response = await sql.readByNameUser(req.body.mail);
   if (response.code == 200) {
 
     return res.status(200).send(response)

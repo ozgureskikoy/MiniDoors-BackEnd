@@ -49,9 +49,12 @@ app.use('/login', loginRouter);
 
 
 const checkTime = require('./helpers/guestExp')
-checkTime()
+function runCheckTime() {
+    checkTime();
+}
+runCheckTime()
 const interval = 10 * 60 * 1000;
-setInterval(checkTime, interval);
+setInterval(runCheckTime, interval);
 
 const socket = require('./helpers/socket/socket')
 socket.start()

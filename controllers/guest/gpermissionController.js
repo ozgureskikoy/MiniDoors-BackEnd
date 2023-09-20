@@ -18,7 +18,6 @@ exports.createPermission = async (req, res) => {
             if (q.code == 4046) {
 
                 const exp = req.body.exp_time
-
                 const exp_time = new Date(exp)
 
                 console.log("exp_time ==> ", exp_time);
