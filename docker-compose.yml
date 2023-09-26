@@ -1,18 +1,6 @@
 version: '3'
 
 services:
-  server:
-    container_name: server
-    restart: always
-    build: .
-    ports:
-      - '3000:3000'
-    environment:
-      POSTGRES_HOST: postgres:1234@postgres:5432
-    depends_on:
-      - postgres
-    links:
-      - postgres
 
   postgres:
     container_name: postgres
@@ -26,4 +14,26 @@ services:
       POSTGRES_PASSWORD: '1234'
       POSTGRES_USER: 'postgres'
       POSTGRES_DB: 'postgres'
-    
+  redis:
+    container_name: redis
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes:
+      - /redisdata:/root/redis
+  server:
+    container_name: server
+    restart: always
+    build: .
+    ports:
+      - '3000:3000'
+    environment:
+      POSTGRES_HOST: postgres:1234@postgres:5432
+    depends_on:
+      - postgres
+      - redis
+    links:
+      - redis
+      - postgres
