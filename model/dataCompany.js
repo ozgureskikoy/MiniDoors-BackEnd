@@ -72,3 +72,47 @@ exports.readByNameCompany = async (index) => {
     return response;
   }
 };
+exports.readByidCompany = async (index) => {
+
+  try {
+    const queryResult = await pool.query(
+      `SELECT id as id,
+              name as name  
+           FROM company
+           WHERE id = $1`,
+      [index]
+    );
+
+    const row = queryResult.rows[0];
+    if (row) {
+      console.log("company found 1");
+      let response = {
+        code: 200,
+        payload: {
+          msg: "Company Found",
+          id: row.id
+        }
+      }
+      return response
+
+    } else {
+      console.log("company not found 1");
+
+      let response = {
+        code: 4044,
+        payload: {
+          msg: "Company Not Found",
+        }
+      }
+      return response;
+    }
+  } catch (error) {
+    let response = {
+      code: 500,
+      payload: {
+        err: error
+      }
+    }
+    return response;
+  }
+};

@@ -2,6 +2,7 @@ const perm = require('./dataPermission');
 const user = require('../controllers/userController')
 const door = require('../controllers/doorController')
 const pool = require('./dbConfig.js');
+
 pool.connect(function (err) {
   if (err) {
     throw err;

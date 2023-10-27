@@ -1,6 +1,7 @@
 const { check, body, query, validationResult } = require('express-validator');
 var jwt = require('jsonwebtoken');
 const tokenS = require('../helpers/tokenControl');
+const comp = require('../model/dataCompany')
 
 exports.typeCheckID = [
     body("id", "id must be integer").isNumeric(),
@@ -113,6 +114,25 @@ exports.tokenControlDoor = [
     }
 
 ]
+exports.controlDoor = [
+    async (req, res, next) => {
+        const compa = req.body.comp_id;
+        console.log("middlewarw=> ",compa);
+        const control = await comp.readByidCompany(compa)
+        if (control.payload.msg=="Company Found") {
+           console.log("Company Found");
+           next();
+        } else {
+
+            return res.status(404).json({
+                code: "4044",
+                message: 'Company Not Found',
+            });
+
+        }
+    }
+
+]
 
 exports.typeStatus = [
     body("status", "status must be integer").isString(),
@@ -129,7 +149,8 @@ exports.typeStatus = [
         next();
     }
 ]
-const A = require('../model/dataLogin')
+const A = require('../model/dataLogin');
+const { checkLogin } = require('../controllers/loginController');
 
 exports.createControl = [
     async(req, res, next)=>{
